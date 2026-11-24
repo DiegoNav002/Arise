@@ -1,9 +1,4 @@
 -- ====================================================================
--- ⚡ 7Z HUB v3.1 (GUI EN ESPAÑOL)
--- Sistema de licencias/key (PlatoBoost, HWID, clipboard) eliminado.
--- ====================================================================
-
--- ====================================================================
 -- ⚡ 7Z HUB v3.1
 -- ====================================================================
 
@@ -87,6 +82,59 @@ local TypeSelector = nil
 local ToggleRaidBtn = nil
 local ToggleFarmBtn = nil
 local TierModal = nil
+
+local OPT = {
+    hideDamageEnabled = false,
+    damageHooked = false,
+    HideDamageBtn = nil,
+    hideSkillEffectsEnabled = false,
+    skillEffectsHooked = false,
+    HideSkillEffectsBtn = nil,
+    secConn = nil,
+    isMinimized = false,
+    currentTab = 1,
+    MinimizeBtn = nil,
+    minKeyConn = nil,
+    redeemingCodes = false,
+    CodesBtn = nil,
+    db = {
+        featureId = 900001,
+        autoLoop = false,
+        collecting = false,
+        snap = nil,
+        lastFetchAt = 0,
+        lastCollectedRound = nil,
+        retryAfter = 0,
+        retryRound = nil,
+        retryCount = 0,
+        StatusLabel = nil,
+        ListLabel = nil,
+        ScanBtn = nil,
+        CollectBtn = nil,
+        AutoBtn = nil,
+    },
+}
+
+-- ====================================================================
+-- ระบบแจ้งเตือนดาเมจ 1% บนหัวตัวละคร (Boss 1% Indicator)
+-- ====================================================================
+local BossAlert = {
+    enabled = true,
+    targetGuid = nil,
+    targetName = nil,
+    targetMaxHp = nil,
+    targetInitialHp = nil,
+    reached1Pct = false,
+    lastReachedGuid = nil,
+    clearAt = 0,
+    billboard = nil,
+    mainFrame = nil,
+    titleLabel = nil,
+    pctLabel = nil,
+    barFill = nil,
+    stroke = nil,
+    Button = nil,
+}
 
 -- ====================================================================
 -- ข้อมูลเรดปกติ (Normal Raids: แมพ 1 Event, แมพ 13 - 22)
@@ -1548,10 +1596,22 @@ end
 
 pcall(function()
     LocalPlayer.CharacterAdded:Connect(function(char)
+        if BossAlert and BossAlert.billboard then
+            pcall(function() BossAlert.billboard:Destroy() end)
+            BossAlert.billboard = nil
+        end
         hookCharacterDropPopups(char)
         task.wait(1)
         if hideDropsEnabled then
             applyDropVisibility()
+        end
+        if OPT.hideDamageEnabled then
+            OPT.ensureDamageHook()
+            OPT.clearDamagePopups()
+        end
+        if OPT.hideSkillEffectsEnabled then
+            OPT.ensureSkillEffectsHook()
+            OPT.clearSkillEffects()
         end
     end)
     if LocalPlayer.Character then
@@ -1616,38 +1676,119 @@ local function deployHeroesToTarget(targetPos, targetGuid)
             PlayerManager.LocalClientSetAttackTarget(LocalPlayer.UserId, targetGuid)
         end
 
-        -- 2. วาปเงาทุกตัวมาประกบรอบเป้าหมายทันที และเริ่มลูปโจมตี (HeroAttack)
+        -- 2. วาปเงาทุกตัวมาประกบรอบเป้าหมายด้วยความสูงเหนือพื้นจริง (ไม่ให้จมแมพลง Void) และเริ่มลูปโจมตี (HeroAttack)
         local playerInst = PlayerManager and PlayerManager.PlayerInstances and PlayerManager.PlayerInstances[LocalPlayer.UserId]
         if playerInst and playerInst.heros then
-            for _, heroEntity in pairs(playerInst.heros) do
-                if heroEntity.character and heroEntity.character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = heroEntity.character.HumanoidRootPart
+            if targetGuid then
+                playerInst.attackTarget = targetGuid
+            end
+
+            local heroList = {}
+            for _, hEnt in pairs(playerInst.heros) do
+                if hEnt and hEnt.character and hEnt.character:FindFirstChild("HumanoidRootPart") then
+                    table.insert(heroList, hEnt)
+                end
+            end
+
+            local totalHeroes = #heroList
+            local rayParams = RaycastParams.new()
+            rayParams.FilterType = Enum.RaycastFilterType.Exclude
+            rayParams.IgnoreWater = true
+            local filter = {}
+            local ef = Workspace:FindFirstChild("Enemys")
+            local hf = Workspace:FindFirstChild("Heros")
+            if ef then table.insert(filter, ef) end
+            if hf then table.insert(filter, hf) end
+            if LocalPlayer.Character then table.insert(filter, LocalPlayer.Character) end
+            if safePlatform then table.insert(filter, safePlatform) end
+            rayParams.FilterDescendantsInstances = filter
+
+            for idx, heroEntity in ipairs(heroList) do
+                local char = heroEntity.character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    -- ยกเลิกเธรดเดิน/หมุนตัวของเกมที่อาจแย่งสถานะและสั่งหยุดตีขณะใช้ Map Farm
+                    if heroEntity.moveFunction then
+                        pcall(task.cancel, heroEntity.moveFunction)
+                        heroEntity.moveFunction = nil
+                    end
+                    if heroEntity.moveConnection then
+                        pcall(function() heroEntity.moveConnection:Disconnect() end)
+                        heroEntity.moveConnection = nil
+                    end
+                    if heroEntity.CancelRotate then
+                        pcall(function() heroEntity:CancelRotate() end)
+                    end
+                    if heroEntity.StopMove then
+                        pcall(function() heroEntity:StopMove() end)
+                    end
+
+                    for _, part in pairs(char:GetChildren()) do
+                        if part:IsA("BasePart") and part.CanCollide then
+                            part.CanCollide = false
+                        end
+                    end
+
+                    local distXZ = Vector2.new(hrp.Position.X - targetPos.X, hrp.Position.Z - targetPos.Z).Magnitude
+                    local fellUnder = (hrp.Position.Y < targetPos.Y - 2.5) or (hrp.Position.Y > targetPos.Y + 25)
+                    local targetChanged = (heroEntity._lastTargetGuid ~= targetGuid)
+
+                    if distXZ > 8 or fellUnder or targetChanged then
+                        local angle = ((idx - 1) / math.max(1, totalHeroes)) * (math.pi * 2)
+                        local offsetX = math.cos(angle) * 3.2
+                        local offsetZ = math.sin(angle) * 3.2
+
+                        local hum = char:FindFirstChildWhichIsA("Humanoid")
+                        local hip = (hum and hum.HipHeight and hum.HipHeight > 0) and hum.HipHeight or 2.0
+                        local rootHeight = math.clamp((hrp.Size.Y * 0.5) + hip + 1.5, 3.0, 6.5)
+
+                        local standY = targetPos.Y + math.max(2.4, rootHeight - 1.5)
+                        pcall(function()
+                            local origin = Vector3.new(targetPos.X + offsetX, targetPos.Y + 25, targetPos.Z + offsetZ)
+                            local hit = Workspace:Raycast(origin, Vector3.new(0, -80, 0), rayParams)
+                            if hit and hit.Position then
+                                standY = math.max(targetPos.Y + 1.8, hit.Position.Y + rootHeight)
+                            end
+                        end)
+
+                        local heroPos = Vector3.new(targetPos.X + offsetX, standY, targetPos.Z + offsetZ)
+                        local lookAtPos = Vector3.new(targetPos.X, standY, targetPos.Z)
+                        if (lookAtPos - heroPos).Magnitude < 0.05 then
+                            lookAtPos = heroPos + Vector3.new(0, 0, -1)
+                        end
+                        local safeCF = CFrame.lookAt(heroPos, lookAtPos)
+
+                        hrp.AssemblyLinearVelocity = Vector3.zero
+                        hrp.AssemblyAngularVelocity = Vector3.zero
+                        hrp.CFrame = safeCF
+
+                        if ProtocolManager and ProtocolManager.Protocols and ProtocolManager.Protocols.HeroReachedAttackPos then
+                            pcall(function()
+                                ProtocolManager.SendMessage(ProtocolManager.Protocols.HeroReachedAttackPos.Name, {
+                                    masterId = LocalPlayer.UserId,
+                                    guid = heroEntity.saveData and heroEntity.saveData.guid,
+                                    cframe = safeCF
+                                })
+                            end)
+                        end
+                    else
+                        if hrp.AssemblyLinearVelocity.Y < -10 then
+                            hrp.AssemblyLinearVelocity = Vector3.zero
+                        end
+                        local lookTarget = Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z)
+                        if (lookTarget - hrp.Position).Magnitude > 0.1 then
+                            hrp.CFrame = CFrame.lookAt(hrp.Position, lookTarget)
+                        end
+                    end
+
                     heroEntity.isMove = false
                     heroEntity.enemyPos = targetPos
-                    heroEntity.fightingPos = targetPos
+                    heroEntity.fightingPos = hrp.Position
                     heroEntity.isLookAtTarget = true
                     heroEntity.currentState = 2 -- HeroEntity.state.Attack
 
-                    -- วาปมาประกบเป้าหมายถ้าอยู่ห่างเกิน 6 studs
-                    if (hrp.Position - targetPos).Magnitude > 6 then
-                        hrp.CFrame = CFrame.new(targetPos + Vector3.new(math.random(-2, 2), 0, math.random(-2, 2)))
-                    end
-
-                    -- แจ้งให้เซิร์ฟเวอร์รู้ว่าเงาถึงตำแหน่งโจมตีแล้ว
-                    if ProtocolManager and ProtocolManager.Protocols and ProtocolManager.Protocols.HeroReachedAttackPos then
-                        pcall(function()
-                            ProtocolManager.SendMessage(ProtocolManager.Protocols.HeroReachedAttackPos.Name, {
-                                masterId = LocalPlayer.UserId,
-                                guid = heroEntity.saveData.guid,
-                                cframe = hrp.CFrame
-                            })
-                        end)
-                    end
-
                     -- ตรวจสอบว่าเงากำลังโจมตีเป้าหมายนี้อยู่หรือไม่ ถ้ายังไม่ได้เริ่ม หรือเธรดตายแล้ว ให้สั่ง HeroAttack ทันที
                     local isDead = (not heroEntity.attackFunction) or (type(heroEntity.attackFunction) == "thread" and coroutine.status(heroEntity.attackFunction) == "dead")
-                    local targetChanged = (heroEntity._lastTargetGuid ~= targetGuid)
-
                     if isDead or targetChanged then
                         heroEntity._lastTargetGuid = targetGuid
                         pcall(function()
@@ -2044,6 +2185,10 @@ local function saveBotState(isAutoResume)
         combatGroundMode = combatGroundMode,
         autoStartOnJoin = autoStartOnJoin,
         hideDropsEnabled = hideDropsEnabled,
+        hideDamageEnabled = OPT.hideDamageEnabled,
+        hideSkillEffectsEnabled = OPT.hideSkillEffectsEnabled,
+        boss1PctAlertEnabled = (BossAlert and BossAlert.enabled == true),
+        dbAutoCollectEnabled = (OPT and OPT.db and OPT.db.autoLoop == true),
         quirkTypeIndex = quirkTypeIndex,
         quirkSlotIndex = quirkSlotIndex,
         quirkSpeedIndex = quirkSpeedIndex,
@@ -2086,6 +2231,18 @@ local function loadBotState()
                 task.defer(applyDropVisibility)
                 task.defer(dismissAllRewardPopups)
             end
+        end
+        if state.hideDamageEnabled ~= nil then
+            OPT.hideDamageEnabled = (state.hideDamageEnabled == true)
+        end
+        if state.hideSkillEffectsEnabled ~= nil then
+            OPT.hideSkillEffectsEnabled = (state.hideSkillEffectsEnabled == true)
+        end
+        if state.boss1PctAlertEnabled ~= nil and BossAlert then
+            BossAlert.enabled = (state.boss1PctAlertEnabled == true)
+        end
+        if state.dbAutoCollectEnabled ~= nil and OPT and OPT.db then
+            OPT.db.autoLoop = (state.dbAutoCollectEnabled == true)
         end
         if state.quirkTypeIndex then quirkTypeIndex = state.quirkTypeIndex end
         if state.quirkSlotIndex then quirkSlotIndex = state.quirkSlotIndex end
@@ -2413,6 +2570,7 @@ MainFrame.Size = UDim2.new(0, 290, 0, 260)
 MainFrame.Position = UDim2.new(0.72, 0, 0.22, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
 MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
@@ -2427,7 +2585,7 @@ Header.Parent = MainFrame
 Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 8)
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -20, 1, 0)
+Title.Size = UDim2.new(1, -74, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "⚡ 7Z HUB"
@@ -2436,6 +2594,40 @@ Title.Font = Enum.Font.GothamBold
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
+
+do
+    local minBtn = Instance.new("TextButton")
+    minBtn.Size = UDim2.new(0, 24, 0, 22)
+    minBtn.Position = UDim2.new(1, -52, 0, 4)
+    minBtn.BackgroundColor3 = Color3.fromRGB(36, 38, 48)
+    minBtn.Text = "—"
+    minBtn.TextColor3 = Color3.fromRGB(235, 215, 150)
+    minBtn.Font = Enum.Font.GothamBold
+    minBtn.TextSize = 13
+    minBtn.Parent = Header
+    Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 5)
+    OPT.MinimizeBtn = minBtn
+end
+
+-- Botón para cerrar la GUI
+do
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 24, 0, 22)
+    closeBtn.Position = UDim2.new(1, -26, 0, 4)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(60, 30, 30)
+    closeBtn.Text = "X"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 13
+    closeBtn.Parent = Header
+    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 5)
+    closeBtn.MouseButton1Click:Connect(function()
+        if OPT.minKeyConn then
+            pcall(function() OPT.minKeyConn:Disconnect() end)
+        end
+        ScreenGui:Destroy()
+    end)
+end
 
 -- TabBar (5 Tabs)
 local TabBar = Instance.new("Frame")
@@ -2566,15 +2758,20 @@ Instance.new("UICorner", ToggleRaidBtn).CornerRadius = UDim.new(0, 6)
 -- ====================================================================
 -- TAB 2: FARM MAP PAGE (กวาดล้างมอนสเตอร์ทั้งแมพ)
 -- ====================================================================
-local PageFarm = Instance.new("Frame")
+local PageFarm = Instance.new("ScrollingFrame")
 PageFarm.Size = UDim2.new(1, -16, 0, 180)
 PageFarm.Position = UDim2.new(0, 8, 0, 66)
 PageFarm.BackgroundTransparency = 1
+PageFarm.BorderSizePixel = 0
+PageFarm.ScrollBarThickness = 6
+PageFarm.ScrollBarImageColor3 = Color3.fromRGB(255, 175, 0)
+PageFarm.ScrollBarImageTransparency = 0.3
+PageFarm.CanvasSize = UDim2.new(0, 0, 0, 315)
 PageFarm.Visible = false
 PageFarm.Parent = MainFrame
 
 local FarmFilterBtn = Instance.new("TextButton")
-FarmFilterBtn.Size = UDim2.new(1, 0, 0, 26)
+FarmFilterBtn.Size = UDim2.new(1, -6, 0, 26)
 FarmFilterBtn.Position = UDim2.new(0, 0, 0, 0)
 FarmFilterBtn.BackgroundColor3 = Color3.fromRGB(35, 45, 55)
 FarmFilterBtn.Text = "Objetivo: Todos los monstruos"
@@ -2585,7 +2782,7 @@ FarmFilterBtn.Parent = PageFarm
 Instance.new("UICorner", FarmFilterBtn).CornerRadius = UDim.new(0, 5)
 
 local MobCountLabel = Instance.new("TextLabel")
-MobCountLabel.Size = UDim2.new(1, 0, 0, 20)
+MobCountLabel.Size = UDim2.new(1, -6, 0, 20)
 MobCountLabel.Position = UDim2.new(0, 0, 0, 30)
 MobCountLabel.BackgroundTransparency = 1
 MobCountLabel.Text = "Monstruos vivos en el mapa: --"
@@ -2595,7 +2792,7 @@ MobCountLabel.TextSize = 10
 MobCountLabel.Parent = PageFarm
 
 FarmStatusLabel = Instance.new("TextLabel")
-FarmStatusLabel.Size = UDim2.new(1, 0, 0, 20)
+FarmStatusLabel.Size = UDim2.new(1, -6, 0, 20)
 FarmStatusLabel.Position = UDim2.new(0, 0, 0, 54)
 FarmStatusLabel.BackgroundTransparency = 1
 FarmStatusLabel.Text = "Estado: Inactivo"
@@ -2605,7 +2802,7 @@ FarmStatusLabel.TextSize = 10
 FarmStatusLabel.Parent = PageFarm
 
 ToggleFarmBtn = Instance.new("TextButton")
-ToggleFarmBtn.Size = UDim2.new(1, 0, 0, 36)
+ToggleFarmBtn.Size = UDim2.new(1, -6, 0, 36)
 ToggleFarmBtn.Position = UDim2.new(0, 0, 0, 82)
 ToggleFarmBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 ToggleFarmBtn.Text = "INICIAR FARMEO DE MAPAS"
@@ -2615,6 +2812,97 @@ ToggleFarmBtn.TextSize = 12
 ToggleFarmBtn.Parent = PageFarm
 Instance.new("UICorner", ToggleFarmBtn).CornerRadius = UDim.new(0, 6)
 
+do
+    local dbDiv = Instance.new("Frame")
+    dbDiv.Size = UDim2.new(1, -6, 0, 1)
+    dbDiv.Position = UDim2.new(0, 0, 0, 124)
+    dbDiv.BackgroundColor3 = Color3.fromRGB(55, 55, 70)
+    dbDiv.BorderSizePixel = 0
+    dbDiv.Parent = PageFarm
+
+    local dbHdr = Instance.new("TextLabel")
+    dbHdr.Size = UDim2.new(1, -6, 0, 16)
+    dbHdr.Position = UDim2.new(0, 0, 0, 129)
+    dbHdr.BackgroundTransparency = 1
+    dbHdr.Text = "🐉 Radar de Dragon Ball (7 esferas gratis)"
+    dbHdr.TextColor3 = Color3.fromRGB(255, 200, 65)
+    dbHdr.Font = Enum.Font.GothamBold
+    dbHdr.TextSize = 10
+    dbHdr.TextXAlignment = Enum.TextXAlignment.Left
+    dbHdr.Parent = PageFarm
+
+    local dbStat = Instance.new("TextLabel")
+    dbStat.Size = UDim2.new(1, -6, 0, 16)
+    dbStat.Position = UDim2.new(0, 0, 0, 146)
+    dbStat.BackgroundTransparency = 1
+    dbStat.Text = "Radar: pulsa Escanear para buscar las 7 esferas"
+    dbStat.TextColor3 = Color3.fromRGB(190, 225, 255)
+    dbStat.Font = Enum.Font.Gotham
+    dbStat.TextSize = 9
+    dbStat.TextXAlignment = Enum.TextXAlignment.Left
+    dbStat.TextTruncate = Enum.TextTruncate.AtEnd
+    dbStat.Parent = PageFarm
+    OPT.db.StatusLabel = dbStat
+
+    local dbBox = Instance.new("Frame")
+    dbBox.Size = UDim2.new(1, -6, 0, 74)
+    dbBox.Position = UDim2.new(0, 0, 0, 164)
+    dbBox.BackgroundColor3 = Color3.fromRGB(24, 26, 35)
+    dbBox.BorderSizePixel = 0
+    dbBox.Parent = PageFarm
+    Instance.new("UICorner", dbBox).CornerRadius = UDim.new(0, 5)
+
+    local dbList = Instance.new("TextLabel")
+    dbList.Size = UDim2.new(1, -10, 1, -6)
+    dbList.Position = UDim2.new(0, 5, 0, 3)
+    dbList.BackgroundTransparency = 1
+    dbList.Text = "• Aún no escaneado (pulsa 🔍 Escanear radar)"
+    dbList.TextColor3 = Color3.fromRGB(235, 235, 240)
+    dbList.Font = Enum.Font.Gotham
+    dbList.TextSize = 9
+    dbList.TextWrapped = true
+    dbList.TextXAlignment = Enum.TextXAlignment.Left
+    dbList.TextYAlignment = Enum.TextYAlignment.Top
+    dbList.Parent = dbBox
+    OPT.db.ListLabel = dbList
+
+    local dbScan = Instance.new("TextButton")
+    dbScan.Size = UDim2.new(0.47, 0, 0, 26)
+    dbScan.Position = UDim2.new(0, 0, 0, 243)
+    dbScan.BackgroundColor3 = Color3.fromRGB(40, 60, 90)
+    dbScan.Text = "🔍 Escanear radar"
+    dbScan.TextColor3 = Color3.fromRGB(210, 235, 255)
+    dbScan.Font = Enum.Font.GothamBold
+    dbScan.TextSize = 10
+    dbScan.Parent = PageFarm
+    Instance.new("UICorner", dbScan).CornerRadius = UDim.new(0, 5)
+    OPT.db.ScanBtn = dbScan
+
+    local dbCollect = Instance.new("TextButton")
+    dbCollect.Size = UDim2.new(0.50, -6, 0, 26)
+    dbCollect.Position = UDim2.new(0.50, 0, 0, 243)
+    dbCollect.BackgroundColor3 = Color3.fromRGB(210, 120, 30)
+    dbCollect.Text = "🚀 Recoger todo automáticamente"
+    dbCollect.TextColor3 = Color3.fromRGB(255, 255, 255)
+    dbCollect.Font = Enum.Font.GothamBold
+    dbCollect.TextSize = 10
+    dbCollect.Parent = PageFarm
+    Instance.new("UICorner", dbCollect).CornerRadius = UDim.new(0, 5)
+    OPT.db.CollectBtn = dbCollect
+
+    local dbAuto = Instance.new("TextButton")
+    dbAuto.Size = UDim2.new(1, -6, 0, 26)
+    dbAuto.Position = UDim2.new(0, 0, 0, 274)
+    dbAuto.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    dbAuto.Text = "♻️ Recolección automática: DESACTIVADA (manual)"
+    dbAuto.TextColor3 = Color3.fromRGB(180, 180, 180)
+    dbAuto.Font = Enum.Font.GothamBold
+    dbAuto.TextSize = 10
+    dbAuto.Parent = PageFarm
+    Instance.new("UICorner", dbAuto).CornerRadius = UDim.new(0, 5)
+    OPT.db.AutoBtn = dbAuto
+end
+
 -- ====================================================================
 -- TAB 3: QUIRK AUTO-REROLL PAGE (สุ่ม Quirk อัตโนมัติ & ล็อคเป้าหมาย)
 -- ====================================================================
@@ -2623,8 +2911,10 @@ PageQuirk.Size = UDim2.new(1, -16, 0, 180)
 PageQuirk.Position = UDim2.new(0, 8, 0, 66)
 PageQuirk.BackgroundTransparency = 1
 PageQuirk.BorderSizePixel = 0
-PageQuirk.ScrollBarThickness = 3
-PageQuirk.CanvasSize = UDim2.new(0, 0, 0, 235)
+PageQuirk.ScrollBarThickness = 6
+PageQuirk.ScrollBarImageColor3 = Color3.fromRGB(255, 175, 0)
+PageQuirk.ScrollBarImageTransparency = 0.3
+PageQuirk.CanvasSize = UDim2.new(0, 0, 0, 250)
 PageQuirk.Visible = false
 PageQuirk.Parent = MainFrame
 
@@ -2735,8 +3025,10 @@ PageSettings.Size = UDim2.new(1, -16, 0, 180)
 PageSettings.Position = UDim2.new(0, 8, 0, 66)
 PageSettings.BackgroundTransparency = 1
 PageSettings.BorderSizePixel = 0
-PageSettings.ScrollBarThickness = 3
-PageSettings.CanvasSize = UDim2.new(0, 0, 0, 186)
+PageSettings.ScrollBarThickness = 6
+PageSettings.ScrollBarImageColor3 = Color3.fromRGB(255, 175, 0)
+PageSettings.ScrollBarImageTransparency = 0.3
+PageSettings.CanvasSize = UDim2.new(0, 0, 0, 306)
 PageSettings.Visible = false
 PageSettings.Parent = MainFrame
 
@@ -2806,6 +3098,56 @@ HideDropsBtn.TextSize = 10
 HideDropsBtn.Parent = PageSettings
 Instance.new("UICorner", HideDropsBtn).CornerRadius = UDim.new(0, 5)
 
+do
+    local hdBtn = Instance.new("TextButton")
+    hdBtn.Size = UDim2.new(1, -6, 0, 26)
+    hdBtn.Position = UDim2.new(0, 0, 0, 180)
+    hdBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    hdBtn.Text = "Ocultar daño: DESACTIVADO (NO - mostrar)"
+    hdBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    hdBtn.Font = Enum.Font.GothamBold
+    hdBtn.TextSize = 10
+    hdBtn.Parent = PageSettings
+    Instance.new("UICorner", hdBtn).CornerRadius = UDim.new(0, 5)
+    OPT.HideDamageBtn = hdBtn
+
+    local hseBtn = Instance.new("TextButton")
+    hseBtn.Size = UDim2.new(1, -6, 0, 26)
+    hseBtn.Position = UDim2.new(0, 0, 0, 210)
+    hseBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    hseBtn.Text = "Ocultar efectos: DESACTIVADO (NO - mostrar)"
+    hseBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    hseBtn.Font = Enum.Font.GothamBold
+    hseBtn.TextSize = 10
+    hseBtn.Parent = PageSettings
+    Instance.new("UICorner", hseBtn).CornerRadius = UDim.new(0, 5)
+    OPT.HideSkillEffectsBtn = hseBtn
+
+    local alert1PctBtn = Instance.new("TextButton")
+    alert1PctBtn.Size = UDim2.new(1, -6, 0, 26)
+    alert1PctBtn.Position = UDim2.new(0, 0, 0, 240)
+    alert1PctBtn.BackgroundColor3 = Color3.fromRGB(35, 60, 40)
+    alert1PctBtn.Text = "Alerta de jefe 1%: ACTIVADA (SÍ - sobre la cabeza)"
+    alert1PctBtn.TextColor3 = Color3.fromRGB(120, 255, 150)
+    alert1PctBtn.Font = Enum.Font.GothamBold
+    alert1PctBtn.TextSize = 10
+    alert1PctBtn.Parent = PageSettings
+    Instance.new("UICorner", alert1PctBtn).CornerRadius = UDim.new(0, 5)
+    BossAlert.Button = alert1PctBtn
+
+    local codesBtn = Instance.new("TextButton")
+    codesBtn.Size = UDim2.new(1, -6, 0, 26)
+    codesBtn.Position = UDim2.new(0, 0, 0, 270)
+    codesBtn.BackgroundColor3 = Color3.fromRGB(70, 52, 110)
+    codesBtn.Text = "🎁 Canjear todos los códigos"
+    codesBtn.TextColor3 = Color3.fromRGB(235, 220, 255)
+    codesBtn.Font = Enum.Font.GothamBold
+    codesBtn.TextSize = 10
+    codesBtn.Parent = PageSettings
+    Instance.new("UICorner", codesBtn).CornerRadius = UDim.new(0, 5)
+    OPT.CodesBtn = codesBtn
+end
+
 -- ====================================================================
 -- TAB 5: INFO PAGE
 -- ====================================================================
@@ -2840,8 +3182,6 @@ TierModal.ZIndex = 20
 TierModal.Parent = MainFrame
 Instance.new("UICorner", TierModal).CornerRadius = UDim.new(0, 8)
 
-local updateTierButtonVisuals
-do
 local ModalTitle = Instance.new("TextLabel")
 ModalTitle.Size = UDim2.new(1, -16, 0, 22)
 ModalTitle.Position = UDim2.new(0, 8, 0, 4)
@@ -2856,7 +3196,7 @@ ModalTitle.Parent = TierModal
 
 local tierButtons = {}
 
-updateTierButtonVisuals = function()
+local function updateTierButtonVisuals()
     local defs = getCurrentTierDefinitions()
     local tiers = getCurrentSelectedTiers()
     for i = 1, 10 do
@@ -2977,12 +3317,14 @@ SelectedSummary.TextSize = 9
 SelectedSummary.TextWrapped = true
 SelectedSummary.ZIndex = 21
 SelectedSummary.Parent = TierModal
-end
 
 local function updateInfoStats()
-    local cStyle = combatGroundMode and "GROUND (บนพื้น)" or "AIR (ลอยฟ้า)"
+    local cStyle = combatGroundMode and "SUELO" or "AIRE"
     local hDrops = hideDropsEnabled and "SÍ (ocultar)" or "NO (mostrar)"
-    InfoText.Text = string.format("Incursiones ganadas: %d\nMonstruos eliminados: %d\nEstilo de combate: %s\nOcultar botín: %s\nIra sin retardo: ACTIVADA (5 golpes)\nAnti-AFK: Activo 24/7", raidWinCount, mobKillCount, cStyle, hDrops)
+    local hDmg = (OPT and OPT.hideDamageEnabled) and "SÍ (ocultar)" or "NO (mostrar)"
+    local hVfx = (OPT and OPT.hideSkillEffectsEnabled) and "SÍ (ocultar)" or "NO (mostrar)"
+    local bAlert = (BossAlert and BossAlert.enabled) and "SÍ" or "NO"
+    InfoText.Text = string.format("Incursiones ganadas: %d\nMonstruos eliminados: %d\nEstilo de combate: %s\nOcultar botín: %s | Daño: %s | Efectos: %s\nAlerta de jefe 1%%: %s | Anti-AFK: 24/7", raidWinCount, mobKillCount, cStyle, hDrops, hDmg, hVfx, bAlert)
 end
 
 -- ====================================================================
@@ -3086,7 +3428,9 @@ QM.Scroll.Size = UDim2.new(1, -16, 0, 145)
 QM.Scroll.Position = UDim2.new(0, 8, 0, 68)
 QM.Scroll.BackgroundColor3 = Color3.fromRGB(14, 14, 18)
 QM.Scroll.BorderSizePixel = 0
-QM.Scroll.ScrollBarThickness = 3
+QM.Scroll.ScrollBarThickness = 6
+QM.Scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 175, 0)
+QM.Scroll.ScrollBarImageTransparency = 0.3
 QM.Scroll.ZIndex = 26
 QM.Scroll.Parent = QuirkTargetModal
 Instance.new("UICorner", QM.Scroll).CornerRadius = UDim.new(0, 6)
@@ -3108,6 +3452,7 @@ QM.DoneBtn.MouseButton1Click:Connect(function()
 end)
 
 local function switchTab(tabIndex)
+    OPT.currentTab = tabIndex
     PageRaid.Visible = (tabIndex == 1)
     PageFarm.Visible = (tabIndex == 2)
     PageQuirk.Visible = (tabIndex == 3)
@@ -3135,6 +3480,50 @@ local function switchTab(tabIndex)
 
     TabInfoBtn.BackgroundColor3 = (tabIndex == 5) and activeBg or inactiveBg
     TabInfoBtn.TextColor3 = (tabIndex == 5) and activeTxt or inactiveTxt
+end
+
+function OPT.setMinimized(collapsed)
+    OPT.isMinimized = (collapsed == true)
+    if OPT.isMinimized then
+        TabBar.Visible = false
+        PageRaid.Visible = false
+        PageFarm.Visible = false
+        PageQuirk.Visible = false
+        PageSettings.Visible = false
+        PageInfo.Visible = false
+        TierModal.Visible = false
+        QuirkTargetModal.Visible = false
+        MainFrame.Size = UDim2.new(0, 165, 0, 30)
+        if OPT.MinimizeBtn then
+            OPT.MinimizeBtn.Text = "+"
+            OPT.MinimizeBtn.BackgroundColor3 = Color3.fromRGB(48, 56, 78)
+        end
+    else
+        MainFrame.Size = UDim2.new(0, 290, 0, 260)
+        TabBar.Visible = true
+        if OPT.MinimizeBtn then
+            OPT.MinimizeBtn.Text = "—"
+            OPT.MinimizeBtn.BackgroundColor3 = Color3.fromRGB(36, 38, 48)
+        end
+        switchTab(OPT.currentTab or 1)
+    end
+end
+
+if OPT.MinimizeBtn then
+    OPT.MinimizeBtn.MouseButton1Click:Connect(function()
+        OPT.setMinimized(not OPT.isMinimized)
+    end)
+end
+
+if UserInputService and UserInputService.InputBegan then
+    local myGui = ScreenGui
+    OPT.minKeyConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if not (myGui and myGui.Parent) then return end
+        if gameProcessed or UserInputService:GetFocusedTextBox() then return end
+        if input.KeyCode == Enum.KeyCode.RightShift then
+            OPT.setMinimized(not OPT.isMinimized)
+        end
+    end)
 end
 
 TabRaidBtn.MouseButton1Click:Connect(function() switchTab(1) end)
@@ -3281,6 +3670,1004 @@ HideDropsBtn.MouseButton1Click:Connect(function()
     updateInfoStats()
     saveBotState(isRaidRunning)
 end)
+
+do
+    function OPT.updateHideDamageVisuals()
+        if not OPT.HideDamageBtn then return end
+        if OPT.hideDamageEnabled then
+            OPT.HideDamageBtn.BackgroundColor3 = Color3.fromRGB(35, 60, 35)
+            OPT.HideDamageBtn.Text = "Ocultar daño: ACTIVADO (SÍ - ocultar)"
+            OPT.HideDamageBtn.TextColor3 = Color3.fromRGB(120, 255, 120)
+        else
+            OPT.HideDamageBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            OPT.HideDamageBtn.Text = "Ocultar daño: DESACTIVADO (NO - mostrar)"
+            OPT.HideDamageBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+        end
+    end
+
+    function OPT.clearDamagePopups()
+        pcall(function()
+            for _, fName in ipairs({ "Enemys", "RaidsEnemys", "Monsters", "Mobs", "Bosses" }) do
+                local f = Workspace:FindFirstChild(fName)
+                if f then
+                    for _, desc in ipairs(f:GetDescendants()) do
+                        if desc.Name == "AttackNum" then
+                            desc:Destroy()
+                        end
+                    end
+                end
+            end
+            if EnemyManager and EnemyManager.enemyEntitys then
+                for _, ent in pairs(EnemyManager.enemyEntitys) do
+                    local ch = ent and (ent.character or ent.model)
+                    local hrp = ch and ch:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        for _, child in ipairs(hrp:GetChildren()) do
+                            if child.Name == "AttackNum" then
+                                child:Destroy()
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+
+    function OPT.ensureDamageHook()
+        if OPT.damageHooked then return end
+        local ee = safeRequire(function() return require(ReplicatedStorage.Scripts.Client.Manager.EnemyManager.EnemyEntity) end)
+        if ee and type(ee.PlayHarmFloatingAnimal) == "function" then
+            local raw = _G.__ariseOrigPlayHarm or ee.PlayHarmFloatingAnimal
+            _G.__ariseOrigPlayHarm = raw
+            local myGui = ScreenGui
+            local optRef = OPT
+            ee.PlayHarmFloatingAnimal = function(self, ...)
+                if myGui and myGui.Parent and optRef.hideDamageEnabled then
+                    return
+                end
+                return raw(self, ...)
+            end
+            OPT.damageHooked = true
+        end
+    end
+
+    if OPT.HideDamageBtn then
+        OPT.HideDamageBtn.MouseButton1Click:Connect(function()
+            OPT.hideDamageEnabled = not OPT.hideDamageEnabled
+            if OPT.hideDamageEnabled then
+                OPT.ensureDamageHook()
+                OPT.clearDamagePopups()
+            end
+            OPT.updateHideDamageVisuals()
+            updateInfoStats()
+            saveBotState(isRaidRunning)
+        end)
+    end
+
+    function OPT.updateHideSkillEffectsVisuals()
+        if not OPT.HideSkillEffectsBtn then return end
+        if OPT.hideSkillEffectsEnabled then
+            OPT.HideSkillEffectsBtn.BackgroundColor3 = Color3.fromRGB(35, 60, 35)
+            OPT.HideSkillEffectsBtn.Text = "Ocultar efectos: ACTIVADO (SÍ - ocultar)"
+            OPT.HideSkillEffectsBtn.TextColor3 = Color3.fromRGB(120, 255, 120)
+        else
+            OPT.HideSkillEffectsBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            OPT.HideSkillEffectsBtn.Text = "Ocultar efectos: DESACTIVADO (NO - mostrar)"
+            OPT.HideSkillEffectsBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+        end
+    end
+
+    function OPT.clearSkillEffects()
+        pcall(function()
+            local container = Workspace:FindFirstChild("SkillEffectContainer")
+            if container then
+                container:ClearAllChildren()
+            end
+            for _, fName in ipairs({ "Enemys", "RaidsEnemys", "Monsters", "Mobs", "Bosses" }) do
+                local f = Workspace:FindFirstChild(fName)
+                if f then
+                    for _, desc in ipairs(f:GetDescendants()) do
+                        if desc.Name == "HitEffect" or desc.Name == "ClickAttackEffect" then
+                            desc:Destroy()
+                        end
+                    end
+                end
+            end
+        end)
+    end
+
+    function OPT.ensureSkillEffectsHook()
+        local myGui = ScreenGui
+        local optRef = OPT
+
+        if not OPT.skillEffectsHooked then
+            local hookedAny = false
+            local ec = safeRequire(function() return require(ReplicatedStorage.Scripts.Client.EffectCtrl) end)
+            if ec then
+                if type(ec.PlaySkillEffect) == "function" then
+                    local raw1 = _G.__ariseOrigPlaySkillEff1 or ec.PlaySkillEffect
+                    _G.__ariseOrigPlaySkillEff1 = raw1
+                    ec.PlaySkillEffect = function(...)
+                        if myGui and myGui.Parent and optRef.hideSkillEffectsEnabled then
+                            return
+                        end
+                        return raw1(...)
+                    end
+                    hookedAny = true
+                end
+                if type(ec.PlaySkillEffect2) == "function" then
+                    local raw2 = _G.__ariseOrigPlaySkillEff2 or ec.PlaySkillEffect2
+                    _G.__ariseOrigPlaySkillEff2 = raw2
+                    ec.PlaySkillEffect2 = function(...)
+                        if myGui and myGui.Parent and optRef.hideSkillEffectsEnabled then
+                            return
+                        end
+                        return raw2(...)
+                    end
+                    hookedAny = true
+                end
+            end
+
+            local ee = safeRequire(function() return require(ReplicatedStorage.Scripts.Client.Manager.EnemyManager.EnemyEntity) end)
+            if ee and type(ee.emit) == "function" then
+                local rawEmit = _G.__ariseOrigEnemyEmit or ee.emit
+                _G.__ariseOrigEnemyEmit = rawEmit
+                ee.emit = function(self, ...)
+                    if myGui and myGui.Parent and optRef.hideSkillEffectsEnabled then
+                        return
+                    end
+                    return rawEmit(self, ...)
+                end
+                hookedAny = true
+            end
+
+            if hookedAny then
+                OPT.skillEffectsHooked = true
+            end
+        end
+
+        local container = Workspace:FindFirstChild("SkillEffectContainer")
+        if container and not OPT.secConn then
+            OPT.secConn = container.ChildAdded:Connect(function(ch)
+                if myGui and myGui.Parent and optRef.hideSkillEffectsEnabled then
+                    task.defer(function() pcall(ch.Destroy, ch) end)
+                end
+            end)
+        end
+    end
+
+    if OPT.HideSkillEffectsBtn then
+        OPT.HideSkillEffectsBtn.MouseButton1Click:Connect(function()
+            OPT.hideSkillEffectsEnabled = not OPT.hideSkillEffectsEnabled
+            if OPT.hideSkillEffectsEnabled then
+                OPT.ensureSkillEffectsHook()
+                OPT.clearSkillEffects()
+            end
+            OPT.updateHideSkillEffectsVisuals()
+            updateInfoStats()
+            saveBotState(isRaidRunning)
+        end)
+    end
+
+    if OPT.CodesBtn then
+        OPT.CodesBtn.MouseButton1Click:Connect(function()
+            if OPT.redeemingCodes then return end
+            OPT.redeemingCodes = true
+            OPT.CodesBtn.BackgroundColor3 = Color3.fromRGB(95, 70, 35)
+            OPT.CodesBtn.Text = "⏳ Comprobando códigos..."
+
+            task.spawn(function()
+                local ok, err = pcall(function()
+                    ensureManagers()
+                    local codeCfg = ConfigManager and ConfigManager.GetConfig and ConfigManager.GetConfig("Code")
+                    if not codeCfg or not codeCfg.data then
+                        OPT.CodesBtn.Text = "❌ No se encontraron códigos en el juego"
+                        task.wait(2.5)
+                        return
+                    end
+
+                    local usedSet = {}
+                    local gc = PlayerManager and PlayerManager.localPlayerData and PlayerManager.localPlayerData.giftCodes
+                    if type(gc) == "table" then
+                        for k, v in pairs(gc) do
+                            if type(v) == "number" or type(v) == "string" then usedSet[v] = true end
+                            if type(k) == "number" and v == true then usedSet[k] = true end
+                        end
+                    end
+
+                    local todo = {}
+                    for _, row in pairs(codeCfg.data) do
+                        if type(row) == "table" and row.IsOpen == 1 and row.Id then
+                            if not usedSet[row.Id] and not usedSet[row.Code] then
+                                table.insert(todo, row)
+                            end
+                        end
+                    end
+                    table.sort(todo, function(a, b) return (a.Id or 0) < (b.Id or 0) end)
+
+                    if #todo == 0 then
+                        OPT.CodesBtn.BackgroundColor3 = Color3.fromRGB(35, 75, 45)
+                        OPT.CodesBtn.Text = "✅ ¡Todos los códigos disponibles canjeados!"
+                        task.wait(2.5)
+                        return
+                    end
+
+                    local okCount, dupCount = 0, 0
+                    for i, row in ipairs(todo) do
+                        if not (ScreenGui and ScreenGui.Parent) then break end
+                        if i == 1 or i % 5 == 0 or i == #todo then
+                            OPT.CodesBtn.Text = string.format("🎁 Canjeando códigos %d/%d...", i, #todo)
+                        end
+                        local res = nil
+                        pcall(function()
+                            if ProtocolManager and ProtocolManager.Protocols and ProtocolManager.Protocols.GiftCodeReceived then
+                                res = ProtocolManager.SendMessage(ProtocolManager.Protocols.GiftCodeReceived.Name, row.Id)
+                            elseif Remotes and Remotes:FindFirstChild("GiftCodeReceived") then
+                                res = Remotes.GiftCodeReceived:InvokeServer(row.Id)
+                            end
+                        end)
+                        if res == 200 then
+                            okCount = okCount + 1
+                        elseif res == 403 then
+                            dupCount = dupCount + 1
+                        end
+                        task.wait(0.08)
+                    end
+
+                    pcall(function()
+                        if UIManager and UIManager.HidePanel then
+                            UIManager.HidePanel("RewardPanel")
+                            UIManager.HidePanel("TipsPanel")
+                            UIManager.HidePanel("TipsFloatingPanel")
+                        end
+                        if hideDropsEnabled then dismissAllRewardPopups() end
+                    end)
+
+                    OPT.CodesBtn.BackgroundColor3 = Color3.fromRGB(35, 75, 45)
+                    OPT.CodesBtn.Text = string.format("✅ Listo: nuevos +%d (duplicados %d)", okCount, dupCount)
+                    task.wait(3.0)
+                end)
+
+                if not ok and OPT.CodesBtn then
+                    OPT.CodesBtn.BackgroundColor3 = Color3.fromRGB(120, 45, 45)
+                    OPT.CodesBtn.Text = "❌ Error: " .. tostring(err):sub(1, 25)
+                    task.wait(2.5)
+                end
+
+                OPT.redeemingCodes = false
+                if OPT.CodesBtn then
+                    OPT.CodesBtn.BackgroundColor3 = Color3.fromRGB(70, 52, 110)
+                    OPT.CodesBtn.Text = "🎁 Canjear todos los códigos"
+                end
+            end)
+        end)
+    end
+end
+
+do
+    local DB = OPT.db
+    local dbMgrCache = nil
+    local mapLabelCache = {}
+    local function getDbMgr()
+        if dbMgrCache then return dbMgrCache end
+        pcall(function()
+            local mod = ReplicatedStorage.Scripts.Client.LimitedActivity.DragonBall.DragonBallSpawnManager
+            if mod then dbMgrCache = require(mod) end
+        end)
+        return dbMgrCache
+    end
+
+    local function formatMMSS(sec)
+        local s = math.max(0, math.floor(tonumber(sec) or 0))
+        return string.format("%02d:%02d", math.floor(s / 60), s % 60)
+    end
+
+    local function getMapLabel(mapId)
+        if mapLabelCache[mapId] then
+            return mapLabelCache[mapId]
+        end
+        local rawName = nil
+        pcall(function()
+            ensureManagers()
+            if ConfigManager and ConfigManager.GetConfig then
+                local cfg = ConfigManager.GetConfig("Map")
+                local row = cfg and (cfg.TryGetDataById and cfg:TryGetDataById(mapId) or cfg:GetDataById(mapId))
+                if row and row.MapName then
+                    rawName = tostring(row.MapName)
+                end
+            end
+        end)
+        local label = "Map " .. tostring(mapId)
+        if rawName and rawName ~= "" then
+            local num, title = rawName:match("^(%d+)%s*,%s*(.+)$")
+            if num and title then
+                label = "Map " .. num .. " (" .. title .. ")"
+            else
+                label = rawName
+            end
+        end
+        mapLabelCache[mapId] = label
+        return label
+    end
+
+    local function isMapUnlocked(mapId)
+        local unlocked = true
+        pcall(function()
+            ensureManagers()
+            if PlayerManager and PlayerManager.localPlayerData and PlayerManager.localPlayerData.mapDatas then
+                unlocked = false
+                for _, md in pairs(PlayerManager.localPlayerData.mapDatas) do
+                    if md and md.mapId == mapId then
+                        unlocked = true
+                        break
+                    end
+                end
+            end
+        end)
+        return unlocked
+    end
+
+    local function getNextSpawnInfo()
+        local now = Workspace:GetServerTimeNow()
+        local nextWait = nil
+        pcall(function()
+            ensureManagers()
+            if ConfigManager and ConfigManager.GetConfig then
+                local actCfg = ConfigManager.GetConfig("LimitedActivity")
+                local spCfg = ConfigManager.GetConfig("DragonBallSpawn")
+                local act = actCfg and actCfg:TryGetDataById(DB.featureId)
+                local sp = spCfg and spCfg:TryGetDataById(DB.featureId)
+                if act and sp and act.Enabled == 1 and sp.Interval and sp.Interval > 0 then
+                    if now < act.StartTime then
+                        nextWait = act.StartTime - now
+                    elseif now < act.EndTime then
+                        local roundIdx = math.floor((now - act.StartTime) / sp.Interval) + 1
+                        local nextAt = act.StartTime + roundIdx * sp.Interval
+                        if nextAt < act.EndTime then
+                            nextWait = math.max(0, nextAt - now)
+                        end
+                    end
+                end
+            end
+        end)
+        return nextWait
+    end
+
+    local function getCurMapIdSafe()
+        local curId = nil
+        pcall(function()
+            ensureManagers()
+            if MapManager and MapManager.currentMapData and MapManager.currentMapData.mapSlotInfo then
+                curId = MapManager.currentMapData.mapSlotInfo.mapId
+            end
+        end)
+        return curId
+    end
+
+    local function isInRaidNow()
+        if isRaidRunning then return true end
+        if RaidsManager and RaidsManager.raidsMapInfo then return true end
+        local curId = getCurMapIdSafe()
+        if curId == 50302 or curId == 50403 or (curId and curId >= 50100 and curId <= 50200) then
+            return true
+        end
+        return false
+    end
+
+    function DB.updateAutoBtnVisuals()
+        if not DB.AutoBtn then return end
+        if DB.autoLoop then
+            DB.AutoBtn.BackgroundColor3 = Color3.fromRGB(35, 65, 45)
+            DB.AutoBtn.Text = "♻️ Recolección automática: ACTIVADA"
+            DB.AutoBtn.TextColor3 = Color3.fromRGB(120, 255, 160)
+        else
+            DB.AutoBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            DB.AutoBtn.Text = "♻️ Recolección automática: DESACTIVADA (manual)"
+            DB.AutoBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+        end
+    end
+
+    function DB.updateCollectBtnVisuals()
+        if not DB.CollectBtn then return end
+        if DB.collecting then
+            DB.CollectBtn.BackgroundColor3 = Color3.fromRGB(190, 55, 55)
+            DB.CollectBtn.Text = "⏹️ Detener recolección"
+        else
+            DB.CollectBtn.BackgroundColor3 = Color3.fromRGB(210, 120, 30)
+            DB.CollectBtn.Text = "🚀 Recoger todo automáticamente"
+        end
+    end
+
+    function DB.fetchSnap(force)
+        pcall(ensureManagers)
+        local mgr = getDbMgr()
+        local cached = mgr and mgr.snapshots and mgr.snapshots[tostring(DB.featureId)]
+        if cached and typeof(cached) == "table" and cached.success == true then
+            if not DB.snap or (cached.roundId or 0) > (DB.snap.roundId or 0) or ((cached.roundId == DB.snap.roundId) and (cached.revision or 0) >= (DB.snap.revision or 0)) then
+                DB.snap = cached
+            end
+        end
+
+        local nowClk = os.clock()
+        if not force and DB.snap and (nowClk - (DB.lastFetchAt or 0) < 3) then
+            return DB.snap
+        end
+        if nowClk - (DB.lastFetchAt or 0) < 0.7 then
+            return DB.snap
+        end
+        DB.lastFetchAt = nowClk
+
+        local res = nil
+        pcall(function()
+            if ProtocolManager and ProtocolManager.Protocols and ProtocolManager.Protocols.GetDragonBallSpawnState then
+                res = ProtocolManager.SendMessage(ProtocolManager.Protocols.GetDragonBallSpawnState.Name, DB.featureId)
+            elseif Remotes and Remotes:FindFirstChild("GetDragonBallSpawnState") then
+                res = Remotes.GetDragonBallSpawnState:InvokeServer(DB.featureId)
+            end
+        end)
+        if typeof(res) == "table" and res.success == true then
+            DB.snap = res
+            pcall(function()
+                if mgr and mgr.ApplySnapshot then
+                    mgr.ApplySnapshot(res)
+                end
+            end)
+        end
+        return DB.snap
+    end
+
+    function DB.renderUI(customStatus)
+        if not DB.StatusLabel or not DB.ListLabel then return end
+        local snap = DB.snap
+        local mgr = getDbMgr()
+        local mgrSnap = mgr and mgr.snapshots and mgr.snapshots[tostring(DB.featureId)]
+        if mgrSnap and typeof(mgrSnap) == "table" and mgrSnap.success == true then
+            if not snap or (mgrSnap.roundId or 0) > (snap.roundId or 0) or ((mgrSnap.roundId == snap.roundId) and (mgrSnap.revision or 0) >= (snap.revision or 0)) then
+                snap = mgrSnap
+                DB.snap = mgrSnap
+            end
+        end
+
+        local now = Workspace:GetServerTimeNow()
+        local entries = (snap and snap.entries) or {}
+        local isLive = snap and snap.isVisible == true and snap.expireAt and now < snap.expireAt and #entries > 0
+
+        if customStatus then
+            DB.StatusLabel.Text = customStatus
+            DB.StatusLabel.TextColor3 = Color3.fromRGB(255, 220, 120)
+        elseif isLive then
+            DB.StatusLabel.Text = string.format("🐉 Ronda #%d | quedan %d esferas (%s más)", snap.roundId or 0, #entries, formatMMSS(snap.expireAt - now))
+            DB.StatusLabel.TextColor3 = Color3.fromRGB(125, 255, 165)
+        else
+            local nextWait = getNextSpawnInfo()
+            if snap and snap.isVisible == true and snap.expireAt and now < snap.expireAt and #entries == 0 then
+                DB.StatusLabel.Text = string.format("✅ ¡Ronda #%d completada! Esperando la nueva ronda %s", snap.roundId or 0, nextWait and formatMMSS(nextWait) or "--:--")
+                DB.StatusLabel.TextColor3 = Color3.fromRGB(150, 230, 255)
+            elseif nextWait then
+                DB.StatusLabel.Text = string.format("⏳ Esperando la siguiente ronda: %s", formatMMSS(nextWait))
+                DB.StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 110)
+            else
+                DB.StatusLabel.Text = "Radar: pulsa 🔍 Escanear para obtener los datos de las esferas"
+                DB.StatusLabel.TextColor3 = Color3.fromRGB(190, 225, 255)
+            end
+        end
+
+        if not isLive then
+            if snap and snap.counts then
+                local parts = {}
+                for star = 1, 7 do
+                    local c = snap.counts[tostring(star)] or 0
+                    if c > 0 then
+                        table.insert(parts, star .. "★x" .. c)
+                    end
+                end
+                local bagTxt = #parts > 0 and table.concat(parts, " ") or "Ninguna"
+                DB.ListLabel.Text = "• No quedan esferas en el mapa esta ronda\n• En la mochila: " .. bagTxt
+            else
+                DB.ListLabel.Text = "• Aún no han aparecido esferas (o no has escaneado)"
+            end
+            return
+        end
+
+        local byMap = {}
+        local mapIds = {}
+        for _, e in ipairs(entries) do
+            if e and e.mapId then
+                if not byMap[e.mapId] then
+                    byMap[e.mapId] = {}
+                    table.insert(mapIds, e.mapId)
+                end
+                table.insert(byMap[e.mapId], e.starId or "?")
+            end
+        end
+        table.sort(mapIds)
+
+        local lines = {}
+        for _, mId in ipairs(mapIds) do
+            table.sort(byMap[mId], function(a, b) return (tonumber(a) or 0) < (tonumber(b) or 0) end)
+            local starStrs = {}
+            for _, st in ipairs(byMap[mId]) do
+                if st == 7 then
+                    table.insert(starStrs, "🌟7★")
+                else
+                    table.insert(starStrs, tostring(st) .. "★")
+                end
+            end
+            local lockTag = isMapUnlocked(mId) and "" or " [🔒]"
+            table.insert(lines, "• " .. getMapLabel(mId) .. lockTag .. ": " .. table.concat(starStrs, ", "))
+        end
+        DB.ListLabel.Text = table.concat(lines, "\n")
+    end
+
+    function DB.collectAll(isAuto)
+        if DB.collecting then return end
+        local snap = DB.fetchSnap(true)
+        local now = Workspace:GetServerTimeNow()
+        if not snap or not snap.isVisible or not snap.expireAt or now >= snap.expireAt or not snap.entries or #snap.entries == 0 then
+            DB.renderUI("⏳ No hay esferas para recoger en esta ronda")
+            return
+        end
+
+        if isAuto and isInRaidNow() then
+            return
+        end
+
+        DB.collecting = true
+        DB.updateCollectBtnVisuals()
+
+        local okRun, errRun = pcall(function()
+            if isFarmRunning then
+                isFarmRunning = false
+                if ToggleFarmBtn then
+                    ToggleFarmBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+                    ToggleFarmBtn.Text = "INICIAR FARMEO DE MAPAS"
+                end
+                removeSafePlatform()
+                if FarmStatusLabel then FarmStatusLabel.Text = "Estado: En pausa (Dragon Ball)" end
+            end
+
+            local startMapId = getCurMapIdSafe()
+            local totalBalls = #snap.entries
+            local collectedCount = 0
+
+            local byMap = {}
+            local mapOrder = {}
+            for _, e in ipairs(snap.entries) do
+                if e and e.mapId then
+                    if not byMap[e.mapId] then
+                        byMap[e.mapId] = {}
+                        table.insert(mapOrder, e.mapId)
+                    end
+                    table.insert(byMap[e.mapId], e)
+                end
+            end
+            table.sort(mapOrder, function(a, b)
+                if a == startMapId then return true end
+                if b == startMapId then return false end
+                return a < b
+            end)
+
+            local mgr = getDbMgr()
+
+            for _, targetMapId in ipairs(mapOrder) do
+                if not DB.collecting then break end
+                if not isMapUnlocked(targetMapId) then
+                    DB.renderUI("⚠️ Saltar " .. getMapLabel(targetMapId) .. " (aún no desbloqueado)")
+                    task.wait(0.6)
+                else
+                    if getCurMapIdSafe() ~= targetMapId then
+                        DB.renderUI("🚀 Teletransportando a " .. getMapLabel(targetMapId) .. "...")
+                        teleportToMap(targetMapId)
+                        local t0 = os.clock()
+                        repeat
+                            task.wait(0.15)
+                        until not DB.collecting
+                            or (os.clock() - t0 > 12)
+                            or (getCurMapIdSafe() == targetMapId
+                                and MapManager and MapManager.IsLoadFinish == true
+                                and MapManager.currentMapData and MapManager.currentMapData.instance
+                                and MapManager.currentMapData.instance:IsDescendantOf(Workspace)
+                                and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart"))
+                        task.wait(0.75)
+                    end
+
+                    if DB.collecting and getCurMapIdSafe() == targetMapId then
+                        local curInst = MapManager and MapManager.currentMapData and MapManager.currentMapData.instance
+                        if curInst then
+                            for _, entry in ipairs(byMap[targetMapId]) do
+                                if not DB.collecting then break end
+                                DB.renderUI(string.format("🐉 Recogiendo %s★ en %s...", tostring(entry.starId or "?"), getMapLabel(targetMapId)))
+                                local worldPos = curInst:GetPivot():PointToWorldSpace(Vector3.new(entry.x, entry.y, entry.z))
+                                local cRes = nil
+                                for attempt = 1, 2 do
+                                    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                    if hrp then
+                                        pcall(function()
+                                            hrp.AssemblyLinearVelocity = Vector3.zero
+                                            hrp.CFrame = CFrame.new(worldPos + Vector3.new(0, 3.5, 0))
+                                        end)
+                                        task.wait(0.25)
+                                        if (hrp.Position - worldPos).Magnitude > 12 then
+                                            pcall(function()
+                                                hrp.AssemblyLinearVelocity = Vector3.zero
+                                                hrp.CFrame = CFrame.new(worldPos + Vector3.new(0, 3.5, 0))
+                                            end)
+                                            task.wait(0.2)
+                                        end
+                                    end
+
+                                    cRes = nil
+                                    pcall(function()
+                                        local payload = {
+                                            featureId = DB.featureId,
+                                            roundId = snap.roundId,
+                                            slotId = entry.slotId,
+                                        }
+                                        if ProtocolManager and ProtocolManager.Protocols and ProtocolManager.Protocols.CollectDragonBall then
+                                            cRes = ProtocolManager.SendMessage(ProtocolManager.Protocols.CollectDragonBall.Name, payload)
+                                        elseif Remotes and Remotes:FindFirstChild("CollectDragonBall") then
+                                            cRes = Remotes.CollectDragonBall:InvokeServer(payload)
+                                        end
+                                    end)
+                                    if typeof(cRes) == "table" and cRes.success == true then
+                                        break
+                                    end
+                                    if attempt == 1 and DB.collecting then
+                                        task.wait(0.35)
+                                    end
+                                end
+
+                                if typeof(cRes) == "table" then
+                                    if cRes.snapshot then
+                                        DB.snap = cRes.snapshot
+                                        pcall(function()
+                                            if mgr and mgr.ApplySnapshot then mgr.ApplySnapshot(cRes.snapshot) end
+                                        end)
+                                    end
+                                    if cRes.success == true then
+                                        collectedCount = collectedCount + 1
+                                    elseif cRes.message then
+                                        DB.renderUI("⚠️ " .. tostring(cRes.message))
+                                    end
+                                end
+                                if hideDropsEnabled then
+                                    dismissRewardPopups()
+                                end
+                                task.wait(0.25)
+                            end
+                        end
+                    end
+                end
+            end
+
+            local finishedClean = DB.collecting
+
+            if startMapId and startMapId >= 50001 and startMapId <= 50030 and getCurMapIdSafe() ~= startMapId then
+                DB.renderUI("🔙 Volviendo al mapa anterior...")
+                teleportToMap(startMapId)
+                task.wait(0.8)
+            end
+
+            if not finishedClean then
+                DB.renderUI("⏹️ Recolección detenida (" .. collectedCount .. "/" .. totalBalls .. " esferas)")
+            else
+                DB.collecting = false
+                task.wait(0.75)
+                local postSnap = DB.fetchSnap(true)
+                local remainingUnlocked = 0
+                if postSnap and postSnap.isVisible == true and postSnap.roundId == snap.roundId and postSnap.entries then
+                    for _, re in ipairs(postSnap.entries) do
+                        if re and re.mapId and isMapUnlocked(re.mapId) then
+                            remainingUnlocked = remainingUnlocked + 1
+                        end
+                    end
+                end
+                if remainingUnlocked == 0 then
+                    DB.lastCollectedRound = snap.roundId
+                    DB.retryCount = 0
+                    DB.retryAfter = 0
+                    DB.renderUI(string.format("✅ Recolección completada: %d/%d esferas (ronda #%d)", collectedCount, totalBalls, snap.roundId or 0))
+                else
+                    if DB.retryRound ~= snap.roundId then
+                        DB.retryRound = snap.roundId
+                        DB.retryCount = 0
+                    end
+                    DB.retryCount = (DB.retryCount or 0) + 1
+                    DB.retryAfter = os.clock() + 15
+                    if DB.retryCount >= 6 then
+                        DB.lastCollectedRound = snap.roundId
+                    end
+                    DB.renderUI(string.format("⚠️ Quedan %d esferas; se intentará de nuevo en 15 s", remainingUnlocked))
+                end
+            end
+        end)
+
+        DB.collecting = false
+        DB.updateCollectBtnVisuals()
+        if not okRun then
+            DB.renderUI("❌ Error: " .. tostring(errRun):sub(1, 45))
+        end
+    end
+
+    if DB.ScanBtn then
+        DB.ScanBtn.MouseButton1Click:Connect(function()
+            task.spawn(function()
+                DB.renderUI("🔍 Escaneando esferas...")
+                DB.fetchSnap(true)
+                DB.renderUI()
+            end)
+        end)
+    end
+
+    if DB.CollectBtn then
+        DB.CollectBtn.MouseButton1Click:Connect(function()
+            if DB.collecting then
+                DB.collecting = false
+                DB.updateCollectBtnVisuals()
+                return
+            end
+            task.spawn(function()
+                DB.collectAll(false)
+            end)
+        end)
+    end
+
+    if DB.AutoBtn then
+        DB.AutoBtn.MouseButton1Click:Connect(function()
+            DB.autoLoop = not DB.autoLoop
+            DB.updateAutoBtnVisuals()
+            saveBotState(isRaidRunning)
+        end)
+    end
+
+    function DB.startLoop()
+        if DB.loopStarted then return end
+        DB.loopStarted = true
+        task.spawn(function()
+            task.wait(2.5)
+            pcall(function() DB.fetchSnap(true) end)
+            DB.renderUI()
+            local tickCnt = 0
+            while ScreenGui and ScreenGui.Parent do
+                task.wait(1)
+                tickCnt = tickCnt + 1
+                if not DB.collecting then
+                    if DB.autoLoop then
+                        local now = Workspace:GetServerTimeNow()
+                        if tickCnt % 6 == 0 then
+                            pcall(function() DB.fetchSnap(false) end)
+                        end
+                        local snap = DB.snap
+                        if snap and snap.isVisible == true and snap.expireAt and now < snap.expireAt and snap.entries and #snap.entries > 0 then
+                            if DB.lastCollectedRound ~= snap.roundId and os.clock() >= (DB.retryAfter or 0) and not isInRaidNow() then
+                                DB.collectAll(true)
+                            end
+                        end
+                    end
+                    if PageFarm and PageFarm.Visible then
+                        if tickCnt % 8 == 0 then
+                            pcall(function() DB.fetchSnap(false) end)
+                        end
+                        DB.renderUI()
+                    end
+                end
+            end
+        end)
+    end
+end
+
+do
+    function BossAlert.updateVisuals()
+        if not BossAlert.Button then return end
+        if BossAlert.enabled then
+            BossAlert.Button.BackgroundColor3 = Color3.fromRGB(35, 60, 40)
+            BossAlert.Button.Text = "Alerta de jefe 1%: ACTIVADA (SÍ - sobre la cabeza)"
+            BossAlert.Button.TextColor3 = Color3.fromRGB(120, 255, 150)
+        else
+            BossAlert.Button.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            BossAlert.Button.Text = "Alerta de jefe 1%: DESACTIVADA (NO)"
+            BossAlert.Button.TextColor3 = Color3.fromRGB(180, 180, 180)
+            if BossAlert.billboard and BossAlert.billboard.Enabled then
+                BossAlert.billboard.Enabled = false
+            end
+        end
+    end
+
+    function BossAlert.ensureBillboard()
+        local char = LocalPlayer.Character
+        local head = char and (char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart"))
+        if not head then return nil end
+
+        if BossAlert.billboard and BossAlert.billboard.Parent == head then
+            return BossAlert.billboard
+        end
+
+        if BossAlert.billboard then
+            pcall(function() BossAlert.billboard:Destroy() end)
+            BossAlert.billboard = nil
+        end
+
+        local existing = head:FindFirstChild("AriseBoss1PctAlert")
+        if existing then
+            pcall(function() existing:Destroy() end)
+        end
+
+        local bb = Instance.new("BillboardGui")
+        bb.Name = "AriseBoss1PctAlert"
+        bb.Size = UDim2.new(0, 195, 0, 42)
+        bb.StudsOffset = Vector3.new(0, 3.5, 0)
+        bb.AlwaysOnTop = true
+        bb.Active = false
+        bb.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        bb.Enabled = false
+        bb.Parent = head
+
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(1, 0, 1, 0)
+        frame.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
+        frame.BackgroundTransparency = 0.15
+        frame.BorderSizePixel = 0
+        frame.Parent = bb
+        Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+
+        local stroke = Instance.new("UIStroke")
+        stroke.Color = Color3.fromRGB(60, 60, 80)
+        stroke.Thickness = 1.2
+        stroke.Parent = frame
+        BossAlert.stroke = stroke
+
+        local titleLbl = Instance.new("TextLabel")
+        titleLbl.Size = UDim2.new(1, -78, 0, 18)
+        titleLbl.Position = UDim2.new(0, 6, 0, 3)
+        titleLbl.BackgroundTransparency = 1
+        titleLbl.Text = "🎯 Boss 1% Tracker"
+        titleLbl.TextColor3 = Color3.fromRGB(220, 220, 230)
+        titleLbl.Font = Enum.Font.GothamBold
+        titleLbl.TextSize = 10
+        titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        titleLbl.TextTruncate = Enum.TextTruncate.AtEnd
+        titleLbl.Parent = frame
+        BossAlert.titleLabel = titleLbl
+
+        local pctLbl = Instance.new("TextLabel")
+        pctLbl.Size = UDim2.new(0, 70, 0, 18)
+        pctLbl.Position = UDim2.new(1, -74, 0, 3)
+        pctLbl.BackgroundTransparency = 1
+        pctLbl.Text = "0.00% / 1%"
+        pctLbl.TextColor3 = Color3.fromRGB(255, 215, 100)
+        pctLbl.Font = Enum.Font.GothamBold
+        pctLbl.TextSize = 10
+        pctLbl.TextXAlignment = Enum.TextXAlignment.Right
+        pctLbl.Parent = frame
+        BossAlert.pctLabel = pctLbl
+
+        local barBg = Instance.new("Frame")
+        barBg.Size = UDim2.new(1, -12, 0, 10)
+        barBg.Position = UDim2.new(0, 6, 0, 24)
+        barBg.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+        barBg.BorderSizePixel = 0
+        barBg.Parent = frame
+        Instance.new("UICorner", barBg).CornerRadius = UDim.new(0, 4)
+
+        local barFill = Instance.new("Frame")
+        barFill.Size = UDim2.new(0, 0, 1, 0)
+        barFill.BackgroundColor3 = Color3.fromRGB(255, 185, 50)
+        barFill.BorderSizePixel = 0
+        barFill.Parent = barBg
+        Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 4)
+        BossAlert.barFill = barFill
+
+        BossAlert.billboard = bb
+        BossAlert.mainFrame = frame
+        return bb
+    end
+
+    function BossAlert.startLoop()
+        task.spawn(function()
+            while ScreenGui and ScreenGui.Parent do
+                task.wait(0.12)
+                if not BossAlert.enabled then
+                    if BossAlert.billboard and BossAlert.billboard.Enabled then
+                        BossAlert.billboard.Enabled = false
+                    end
+                    continue
+                end
+
+                local bb = BossAlert.ensureBillboard()
+                if not bb then continue end
+
+                local curGuid = BattleService and BattleService.attackEnemyGUID
+                if not curGuid then
+                    local pInst = PlayerManager and PlayerManager.PlayerInstances and PlayerManager.PlayerInstances[LocalPlayer.UserId]
+                    curGuid = pInst and pInst.attackTarget
+                    if type(curGuid) == "table" then
+                        curGuid = curGuid.guid or (curGuid.data and curGuid.data.guid)
+                    end
+                end
+
+                local ent = curGuid and EnemyManager and EnemyManager.enemyEntitys and EnemyManager.enemyEntitys[curGuid]
+                local now = tick()
+
+                if ent and ent.data then
+                    local hp = tonumber(ent.data.hp)
+                    local maxHp = tonumber(ent.data.maxHp)
+                    local name = ent.data.name or (ent.character and ent.character.Name) or "Boss"
+
+                    if maxHp and maxHp >= 1e7 and hp and hp > 0 then
+                        if BossAlert.targetGuid ~= curGuid then
+                            BossAlert.targetGuid = curGuid
+                            BossAlert.targetName = name
+                            BossAlert.targetMaxHp = maxHp
+                            BossAlert.targetInitialHp = hp
+                            BossAlert.reached1Pct = false
+                        end
+
+                        local totalDmg = maxHp - hp
+                        local sessionDmg = (BossAlert.targetInitialHp or maxHp) - hp
+                        local usedDmg = math.max(totalDmg, sessionDmg, 0)
+                        local pct = (usedDmg / maxHp) * 100
+
+                        bb.Enabled = true
+
+                        if pct >= 1.0 then
+                            if not BossAlert.reached1Pct then
+                                BossAlert.reached1Pct = true
+                                BossAlert.lastReachedGuid = curGuid
+                                pcall(function()
+                                    if SoundManager and SoundManager.PlaySound then
+                                        SoundManager.PlaySound(SoundManager.soundType.Sound2D, 160022)
+                                    end
+                                end)
+                            end
+
+                            BossAlert.titleLabel.Text = "🎉 1% REACHED! (" .. tostring(name) .. ")"
+                            BossAlert.titleLabel.TextColor3 = Color3.fromRGB(130, 255, 170)
+                            BossAlert.pctLabel.Text = string.format("%.2f%%", pct)
+                            BossAlert.pctLabel.TextColor3 = Color3.fromRGB(130, 255, 170)
+                            BossAlert.barFill.Size = UDim2.new(1, 0, 1, 0)
+                            BossAlert.barFill.BackgroundColor3 = Color3.fromRGB(60, 255, 130)
+                            if BossAlert.stroke then
+                                BossAlert.stroke.Color = Color3.fromRGB(70, 230, 140)
+                            end
+                            BossAlert.clearAt = now + 4.0
+                        else
+                            BossAlert.titleLabel.Text = "🎯 " .. tostring(name)
+                            BossAlert.titleLabel.TextColor3 = Color3.fromRGB(220, 220, 235)
+                            BossAlert.pctLabel.Text = string.format("%.2f%% / 1%%", pct)
+                            BossAlert.pctLabel.TextColor3 = Color3.fromRGB(255, 215, 110)
+                            BossAlert.barFill.Size = UDim2.new(math.clamp(pct / 1.0, 0, 1), 0, 1, 0)
+                            BossAlert.barFill.BackgroundColor3 = Color3.fromRGB(255, 185, 50)
+                            if BossAlert.stroke then
+                                BossAlert.stroke.Color = Color3.fromRGB(70, 70, 95)
+                            end
+                        end
+                    else
+                        if BossAlert.reached1Pct and now < (BossAlert.clearAt or 0) then
+                            bb.Enabled = true
+                        else
+                            bb.Enabled = false
+                        end
+                    end
+                else
+                    if BossAlert.reached1Pct and now < (BossAlert.clearAt or 0) then
+                        bb.Enabled = true
+                    else
+                        bb.Enabled = false
+                    end
+                end
+            end
+        end)
+    end
+
+    if BossAlert.Button then
+        BossAlert.Button.MouseButton1Click:Connect(function()
+            BossAlert.enabled = not BossAlert.enabled
+            BossAlert.updateVisuals()
+            updateInfoStats()
+            saveBotState(isRaidRunning)
+        end)
+    end
+end
 
 -- ====================================================================
 
@@ -3911,6 +5298,14 @@ local function autoFarmMapLoop()
     removeSafePlatform()
     local lastSeenGuids = {}
     local candidateIndex = 1
+    local lockedFarmGuid = nil
+    local lockedFarmLastHp = nil
+    local lockedFarmLastHpDropAt = 0
+    local farmDeadGhostGuids = {}
+    local farmStuckCooldownUntil = {}
+    local farmStuckFailCount = {}
+    local serverConfirmedAlive = {}
+    local lastServerAcceptedClickGuid = nil
 
     while isFarmRunning do
         ensureManagers()
@@ -3922,7 +5317,60 @@ local function autoFarmMapLoop()
             continue
         end
 
-        local allEnemies = getAllMapEnemies()
+        local now = tick()
+        local rawEnemies = getAllMapEnemies()
+        local allEnemies = {}
+        local bySpawnName = {}
+
+        -- กรองศพค้าง (DeathM1) และตรวจสอบกรณีมอนซ้อนจุดเกิดเดียวกัน (spawnName ซ้ำกันใน Infinity Tower 50301/50303)
+        for _, enemy in ipairs(rawEnemies) do
+            local guid = enemy.guid
+            local m = enemy.model
+            local ent = enemy.entity or (EnemyManager and EnemyManager.enemyEntitys and EnemyManager.enemyEntitys[guid])
+            local hasDeathM1 = m and m:FindFirstChild("DeathM1", true) ~= nil
+            local isGhost = farmDeadGhostGuids[guid] == true
+
+            if not hasDeathM1 and not isGhost and ent and ent.isLive ~= false and ent.isDeathEffectPlayed ~= true then
+                local sName = ent.data and ent.data.spawnName and tostring(ent.data.spawnName) or nil
+                enemy.spawnName = sName
+                if sName then
+                    local prev = bySpawnName[sName]
+                    if prev then
+                        local prevFails = farmStuckFailCount[prev.guid] or 0
+                        local curFails = farmStuckFailCount[guid] or 0
+                        if curFails < prevFails then
+                            bySpawnName[sName] = enemy
+                        end
+                    else
+                        bySpawnName[sName] = enemy
+                    end
+                end
+                table.insert(allEnemies, enemy)
+            end
+        end
+
+        -- คำนวณสถานะติดบัคซ้อนกัน (isStuckCooldown) และรวบรวม GUID มอนที่ยืนทับพิกัดเดียวกัน (ระยะ <= 8.5 studs)
+        for i = 1, #allEnemies do
+            local a = allEnemies[i]
+            local sKey = a.spawnName
+            local preferred = sKey and bySpawnName[sKey]
+            local isDupSpawn = (preferred ~= nil and preferred.guid ~= a.guid)
+            local stuckUntil = farmStuckCooldownUntil[a.guid] or 0
+            a.isStuckCooldown = (now < stuckUntil) or isDupSpawn
+            a.stuckFails = farmStuckFailCount[a.guid] or 0
+
+            local stacks = {}
+            for j = 1, #allEnemies do
+                if i ~= j then
+                    local b = allEnemies[j]
+                    if a.pos and b.pos and (a.pos - b.pos).Magnitude <= 8.5 then
+                        table.insert(stacks, b.guid)
+                    end
+                end
+            end
+            a.stackedGuids = stacks
+        end
+
         MobCountLabel.Text = "Monstruos vivos en el mapa: " .. #allEnemies
 
         if #allEnemies == 0 then
@@ -3936,16 +5384,21 @@ local function autoFarmMapLoop()
             end
             lastSeenGuids = {}
             candidateIndex = 1
+            lockedFarmGuid = nil
             FarmStatusLabel.Text = "Estado: ¡Mapa despejado! Esperando..."
-            task.wait(0.5)
+            task.wait(0.35)
             continue
         end
 
-        -- คัดกรองตาม Filter (All, Boss Only, Normal Only) และตัด Dummy / Gojo ที่เป็นอมตะออก
+        -- คัดกรองตาม Filter (All, Boss Only, Normal Only) และตัดเฉพาะ Dummy จริงหรือค่า HP ผิดปกติออก (ไม่ตัดมอนเลือด > 1e30 ใน Infinity Tower ชั้น 60+ / Gojo)
         local candidates = {}
+        local candidateByGuid = {}
         local currentAliveGuids = {}
         for _, enemy in ipairs(allEnemies) do
-            local isDummy = (enemy.name == "Gojo" or enemy.name:lower():find("gojo") ~= nil or (enemy.hp and enemy.hp > 1e30) or (enemy.maxHp and enemy.maxHp > 1e30))
+            local lowerName = tostring(enemy.name or ""):lower()
+            local hpInvalid = (enemy.hp and (enemy.hp == math.huge or enemy.hp ~= enemy.hp))
+                or (enemy.maxHp and (enemy.maxHp == math.huge or enemy.maxHp ~= enemy.maxHp))
+            local isDummy = (lowerName:find("dummy") ~= nil) or hpInvalid
             if not isDummy then
                 local isBoss = (enemy.level == 99 or enemy.name:lower():find("boss") ~= nil)
                 local match = false
@@ -3959,6 +5412,7 @@ local function autoFarmMapLoop()
 
                 if match then
                     table.insert(candidates, enemy)
+                    candidateByGuid[enemy.guid] = enemy
                     currentAliveGuids[enemy.guid] = true
                 end
             end
@@ -3979,14 +5433,21 @@ local function autoFarmMapLoop()
 
         if #candidates == 0 then
             candidateIndex = 1
+            lockedFarmGuid = nil
             FarmStatusLabel.Text = "Estado: Esperando tipo de objetivo..."
-            task.wait(0.5)
+            task.wait(0.4)
             continue
         end
 
-        -- จัดลำดับ: หากเปิด Boss Priority ให้บอสขึ้นก่อน นอกนั้นเรียงตามระยะใกล้สุด
+        -- จัดลำดับ: ตัวที่ไม่ติดคูลดาวน์บัคซ้อนกันมาก่อนเสมอ -> ตัวที่จำนวนครั้งค้างน้อยกว่า -> Boss Priority -> ระยะใกล้สุด
         local myPos = hrp.Position
         table.sort(candidates, function(a, b)
+            if a.isStuckCooldown ~= b.isStuckCooldown then
+                return not a.isStuckCooldown
+            end
+            if (a.stuckFails or 0) ~= (b.stuckFails or 0) then
+                return (a.stuckFails or 0) < (b.stuckFails or 0)
+            end
             if bossPriorityEnabled then
                 local aIsBoss = (a.level == 99 or a.name:lower():find("boss") ~= nil)
                 local bIsBoss = (b.level == 99 or b.name:lower():find("boss") ~= nil)
@@ -4002,12 +5463,26 @@ local function autoFarmMapLoop()
             hrp.AssemblyAngularVelocity = Vector3.zero
         end)
 
-        -- เลือกเป้าหมายแบบหมุนเวียน (Round-Robin Multi-Target) เพื่อให้ตีมอนสเตอร์ทั่วถึงทั้งแมพ
-        if candidateIndex > #candidates then candidateIndex = 1 end
-        local target = candidates[candidateIndex]
+        -- ล็อคตีเป้าหมายเดิมจนกว่าจะตายหรือเลือดไม่ลดเกิน ~1 วินาที (ป้องกันสลับเป้าทุก 0.4s จนสกิลเงาโดนยกเลิกกลางคัน)
+        local target = nil
+        if lockedFarmGuid and candidateByGuid[lockedFarmGuid] and not candidateByGuid[lockedFarmGuid].isStuckCooldown then
+            target = candidateByGuid[lockedFarmGuid]
+        else
+            if candidateIndex > #candidates then candidateIndex = 1 end
+            target = candidates[candidateIndex]
+            if target and target.isStuckCooldown and not candidates[1].isStuckCooldown then
+                target = candidates[1]
+                candidateIndex = 1
+            end
+            lockedFarmGuid = target and target.guid or nil
+            lockedFarmLastHp = target and tonumber(target.hp) or nil
+            lockedFarmLastHpDropAt = tick()
+        end
+
         local guid = target.guid
         local pos = target.pos
         local model = target.model
+        local stackedGuids = target.stackedGuids or {}
 
         if pos then
             -- หันหน้าเข้าหาเป้าหมายเพื่อให้ท่าทางการโจมตีดูเป็นธรรมชาติ
@@ -4018,15 +5493,55 @@ local function autoFarmMapLoop()
                 end
             end)
 
-            -- แจ้งเป้าหมายไปยังเซิร์ฟเวอร์แบบ Asynchronous (เปิดระบบต่อสู้ของเซิร์ฟเวอร์)
-            pcall(function()
-                Remotes.ClickEnemy:InvokeServer({ enemyGuid = guid, enemyPos = pos })
-            end)
-            pcall(function()
-                AgentManager.SendEvent(AgentManager.EventNames.ClickEnemy, { enemyGuid = guid, enemyCharacter = model })
-            end)
+            -- แจ้งเป้าหมายไปยังเซิร์ฟเวอร์แบบไม่ซ้ำซ้อน (ลดการชนกันระหว่าง Remotes.ClickEnemy กับ AgentManager จนถูกเข้าใจผิดว่าเป็นมอนผี)
+            if Remotes and Remotes.ClickEnemy then
+                if lastServerAcceptedClickGuid ~= guid then
+                    local clickGuid = guid
+                    local clickPos = pos
+                    local wasAlreadyTargeted = (BattleService and BattleService.attackEnemyGUID == clickGuid)
+                    lastServerAcceptedClickGuid = clickGuid
+                    task.spawn(function()
+                        local ok, res = pcall(function()
+                            return Remotes.ClickEnemy:InvokeServer({ enemyGuid = clickGuid, enemyPos = clickPos })
+                        end)
+                        if ok then
+                            local cEnt = EnemyManager and EnemyManager.enemyEntitys and EnemyManager.enemyEntitys[clickGuid]
+                            if res == true then
+                                serverConfirmedAlive[clickGuid] = true
+                                if cEnt and cEnt.ShowHpBar then
+                                    pcall(cEnt.ShowHpBar, cEnt)
+                                end
+                            elseif res == false then
+                                if wasAlreadyTargeted and cEnt and cEnt.isLive ~= false and not (cEnt.data and cEnt.data.hp and cEnt.data.hp <= 0) then
+                                    serverConfirmedAlive[clickGuid] = true
+                                else
+                                    if lastServerAcceptedClickGuid == clickGuid then
+                                        lastServerAcceptedClickGuid = nil
+                                    end
+                                    if not serverConfirmedAlive[clickGuid] then
+                                        farmStuckFailCount[clickGuid] = (farmStuckFailCount[clickGuid] or 0) + 1
+                                        farmStuckCooldownUntil[clickGuid] = tick() + 4.0
+                                        if farmStuckFailCount[clickGuid] >= 3 and EnemyManager and EnemyManager.DestroyEnemy then
+                                            farmDeadGhostGuids[clickGuid] = true
+                                            pcall(EnemyManager.DestroyEnemy, clickGuid)
+                                        end
+                                    end
+                                end
+                            end
+                        else
+                            if lastServerAcceptedClickGuid == clickGuid then
+                                lastServerAcceptedClickGuid = nil
+                            end
+                        end
+                    end)
+                end
+            else
+                pcall(function()
+                    AgentManager.SendEvent(AgentManager.EventNames.ClickEnemy, { enemyGuid = guid, enemyCharacter = model })
+                end)
+            end
 
-            -- สั่งกองทัพเงาเข้าประกบเป้าหมายและโจมตี
+            -- สั่งกองทัพเงาเข้าประกบเป้าหมายและโจมตี (ใช้ความสูงเหนือพื้นจริง ไม่จมแมพ)
             deployHeroesToTarget(pos, guid)
 
             if BattleService then
@@ -4035,15 +5550,24 @@ local function autoFarmMapLoop()
             end
         end
 
-        -- ส่ง Packet โจมตีของผู้เล่นแบบคลีน ไม่ยิงซ้ำซ้อน ไม่ทำให้เซิร์ฟเวอร์ Rate Limit
-        local attackPacket = { attackEnemyGUID = guid, autoClickEnemyGUID = guid }
-        pcall(function()
-            if ProtocolManager and ProtocolManager.Protocols and ProtocolManager.Protocols.PlayerClickAttack then
-                ProtocolManager.SendMessage(ProtocolManager.Protocols.PlayerClickAttack.Name, attackPacket)
-            elseif Remotes and Remotes.PlayerClickAttack then
-                Remotes.PlayerClickAttack:FireServer(attackPacket)
+        -- ส่ง Packet โจมตีของผู้เล่นไปยังเป้าหมายหลัก และหากมีมอนซ้อนกัน (stackedGuids ใน Infinity Tower) ให้กวาดตีทุกตัวในกองพร้อมกัน
+        local function sendPlayerAttackToGuid(tGuid)
+            local attackPacket = { attackEnemyGUID = tGuid, autoClickEnemyGUID = tGuid }
+            pcall(function()
+                if ProtocolManager and ProtocolManager.Protocols and ProtocolManager.Protocols.PlayerClickAttack then
+                    ProtocolManager.SendMessage(ProtocolManager.Protocols.PlayerClickAttack.Name, attackPacket)
+                elseif Remotes and Remotes.PlayerClickAttack then
+                    Remotes.PlayerClickAttack:FireServer(attackPacket)
+                end
+            end)
+        end
+
+        sendPlayerAttackToGuid(guid)
+        if #stackedGuids > 0 then
+            for sIdx = 1, math.min(4, #stackedGuids) do
+                sendPlayerAttackToGuid(stackedGuids[sIdx])
             end
-        end)
+        end
 
         -- ปลดปล่อย Weapon Skill / ตีธรรมดาผ่านหน้า UI
         local mainPanel = UIManager and UIManager.panelDict and UIManager.panelDict[UIManager.UIPanelName.MainPanel]
@@ -4059,28 +5583,63 @@ local function autoFarmMapLoop()
         end
 
         local ent = EnemyManager and EnemyManager.enemyEntitys and EnemyManager.enemyEntitys[guid]
-        local curHp = (ent and ent.data and ent.data.hp) or (model and model:FindFirstChildWhichIsA("Humanoid") and model.Humanoid.Health) or target.hp or "--"
-        FarmStatusLabel.Text = string.format("Farmeando: %s (PV: %s) [%d/%d]", target.name, tostring(curHp), candidateIndex, #candidates)
+        local curHp = (ent and ent.data and ent.data.hp) or target.hp or "--"
+        local stackTag = (#stackedGuids > 0) and string.format(" [Stack:%d]", #stackedGuids + 1) or ""
+        FarmStatusLabel.Text = string.format("Farming: %s (HP: %s)%s [%d/%d]", target.name, tostring(curHp), stackTag, candidateIndex, #candidates)
 
         if hideDropsEnabled then
             dismissRewardPopups()
         end
 
-        -- ตรวจสอบการตายแบบไดนามิก (Fast Kill Check)
-        -- หากมอนสเตอร์ตายไว (1-hit) จะเปลี่ยนไปตีตัวถัดไปทันทีโดยไม่ต้องรอแช่นาน
-        for checkTick = 1, 4 do
+        -- ตรวจสอบการตายและตรวจจับมอนบัคซ้อนกันที่ตีไม่เข้า (Fast Kill + Overlap Stall Detector)
+        local targetDied = false
+        for checkTick = 1, 5 do
             task.wait(0.1)
             local checkEnt = EnemyManager and EnemyManager.enemyEntitys and EnemyManager.enemyEntitys[guid]
-            local hpNow = checkEnt and checkEnt.data and checkEnt.data.hp
-            if not checkEnt or (hpNow and hpNow <= 0) or (model and model:GetAttribute("Died") == true) then
-                mobKillCount = mobKillCount + 1
-                updateInfoStats()
+            local hpNow = checkEnt and checkEnt.data and tonumber(checkEnt.data.hp)
+            local hasDeathM1 = model and model:FindFirstChild("DeathM1", true) ~= nil
+
+            if not checkEnt or checkEnt.isLive == false or checkEnt.isDeathEffectPlayed == true or (hpNow and hpNow <= 0) or hasDeathM1 then
+                targetDied = true
                 break
+            end
+
+            if hpNow then
+                if not lockedFarmLastHp or hpNow < lockedFarmLastHp then
+                    lockedFarmLastHp = hpNow
+                    lockedFarmLastHpDropAt = tick()
+                    farmStuckFailCount[guid] = 0
+                end
+            end
+
+            if checkTick == 3 and pos then
+                deployHeroesToTarget(pos, guid)
             end
         end
 
-        -- สลับเป้าหมายตัวถัดไปในรอบหน้าเสมอ เพื่อให้การโจมตีกระจายทั่วถึงทุกตัวในแมพ ไม่ค้างที่ตัวเดียว
-        candidateIndex = candidateIndex + 1
+        if targetDied then
+            mobKillCount = mobKillCount + 1
+            updateInfoStats()
+            lockedFarmGuid = nil
+            farmStuckCooldownUntil[guid] = nil
+            farmStuckFailCount[guid] = nil
+            serverConfirmedAlive[guid] = nil
+        else
+            local stallElapsed = tick() - (lockedFarmLastHpDropAt or 0)
+            local stallLimit = (#stackedGuids > 0) and 1.5 or 2.5
+            if stallElapsed >= stallLimit then
+                local fails = (farmStuckFailCount[guid] or 0) + 1
+                farmStuckFailCount[guid] = fails
+                farmStuckCooldownUntil[guid] = tick() + 4.5
+                lockedFarmGuid = nil
+                candidateIndex = candidateIndex + 1
+
+                if fails >= 5 and #stackedGuids > 0 and not serverConfirmedAlive[guid] and EnemyManager and EnemyManager.DestroyEnemy then
+                    farmDeadGhostGuids[guid] = true
+                    pcall(EnemyManager.DestroyEnemy, guid)
+                end
+            end
+        end
     end
 
     removeSafePlatform()
@@ -4181,14 +5740,14 @@ local function autoRaidLoop()
                     targetMapId = 50001
                 end
             elseif mapCfg.isAscension then
-                -- สำหรับเรด Ascension: ค้นหาใน openGates ว่ามีประตูหอคอยชั้นและระดับที่เลือกเปิดอยู่หรือไม่
+                -- สำหรับเรด Ascension: ค้นหาเฉพาะประตูหอคอยของชั้นที่เลือกไว้ (mapCfg.baseId) ใน openGates เท่านั้น (ไม่ข้ามไปเข้าแมพ Asc อื่น หรือ Event Raid)
                 for offset = 10, 1, -1 do
                     if activeTiers[offset] then
                         local checkRaidId = (mapCfg.baseId or 935000) + offset
                         for _, g in ipairs(openGates) do
                             if g.raidId == checkRaidId then
                                 targetRaidId = g.raidId
-                                targetMapId = g.mapId
+                                targetMapId = (g.mapId and g.mapId > 0) and g.mapId or mapCfg.mapId
                                 break
                             end
                         end
@@ -4196,21 +5755,7 @@ local function autoRaidLoop()
                     end
                 end
 
-                -- หากยังไม่พบชั้นเจาะจง ให้ตรวจหาเรด Ascension อื่นๆ ที่เปิดอยู่ในเซิร์ฟเวอร์ (935000 - 938000)
-                if not targetRaidId then
-                    for _, g in ipairs(openGates) do
-                        if g.raidId >= 935000 and g.raidId <= 938000 then
-                            local tierOffset = g.raidId % 100
-                            if activeTiers[tierOffset] or true then
-                                targetRaidId = g.raidId
-                                targetMapId = g.mapId
-                                break
-                            end
-                        end
-                    end
-                end
-
-                -- หากใน openGates ไม่มีข้อมูล แต่ต้องการท้าทายชั้นนี้
+                -- หากใน openGates ไม่มีข้อมูล แต่ต้องการท้าทายชั้นที่เลือกไว้โดยตรง (ใช้เฉพาะ mapCfg ของชั้นนั้นๆ)
                 if not targetRaidId then
                     for offset = 10, 1, -1 do
                         if activeTiers[offset] then
@@ -4219,6 +5764,11 @@ local function autoRaidLoop()
                             break
                         end
                     end
+                end
+                if not targetRaidId then
+                    RaidStatusLabel.Text = "Estado: ¡Selecciona al menos 1 nivel!"
+                    task.wait(1.0)
+                    continue
                 end
             else
                 -- เรดปกติ (Normal Raids)
@@ -4812,6 +6362,12 @@ updateInfoStats()
 updateAutoRejoinButtonVisuals()
 updateHideDropsButtonVisuals()
 updateQuirkButtonVisuals()
+if OPT and OPT.updateHideDamageVisuals then OPT.updateHideDamageVisuals() end
+if OPT and OPT.updateHideSkillEffectsVisuals then OPT.updateHideSkillEffectsVisuals() end
+if OPT and OPT.db and OPT.db.updateAutoBtnVisuals then OPT.db.updateAutoBtnVisuals() end
+if OPT and OPT.db and OPT.db.startLoop then OPT.db.startLoop() end
+if BossAlert and BossAlert.updateVisuals then BossAlert.updateVisuals() end
+if BossAlert and BossAlert.startLoop then BossAlert.startLoop() end
 
 if autoStartOnJoin then
     AutoStartBtn.BackgroundColor3 = Color3.fromRGB(35, 60, 40)
@@ -4828,7 +6384,23 @@ if hideDropsEnabled then
     dismissAllRewardPopups()
 end
 
-if shouldAutoResume or autoStartOnJoin then
+if OPT and (OPT.hideDamageEnabled or OPT.hideSkillEffectsEnabled) then
+    task.spawn(function()
+        if not LocalPlayer.Character then
+            LocalPlayer.CharacterAdded:Wait()
+        end
+        if OPT and OPT.hideDamageEnabled then
+            OPT.ensureDamageHook()
+            OPT.clearDamagePopups()
+        end
+        if OPT and OPT.hideSkillEffectsEnabled then
+            OPT.ensureSkillEffectsHook()
+            OPT.clearSkillEffects()
+        end
+    end)
+end
+
+if shouldAutoResume or (autoStartOnJoin and not (OPT and OPT.db and OPT.db.autoLoop)) then
     task.spawn(function()
         repeat task.wait(1) until LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         task.wait(2)
@@ -4841,3 +6413,80 @@ if shouldAutoResume or autoStartOnJoin then
         end
     end)
 end
+
+-- ====================================================================
+-- 🎨 REDISEÑO VISUAL (solo apariencia; la lógica y los estados no se tocan)
+-- ====================================================================
+do
+    local accent   = Color3.fromRGB(0, 195, 255)
+    local gold     = Color3.fromRGB(255, 185, 70)
+    local lineCol  = Color3.fromRGB(70, 78, 105)
+    local cardCol  = Color3.fromRGB(28, 31, 43)
+
+    local function corner(obj, radius)
+        if obj:FindFirstChildOfClass("UICorner") then return end
+        local c = Instance.new("UICorner", obj)
+        c.CornerRadius = UDim.new(0, radius or 6)
+    end
+
+    local function stroke(obj, color, thickness, transparency)
+        local s = obj:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke", obj)
+        s.Color = color
+        s.Thickness = thickness
+        s.Transparency = transparency
+        s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    end
+
+    local function style(obj)
+        if obj.Name == "AccentBar" or not obj:IsA("GuiObject") then return end
+        if obj:IsA("TextButton") then
+            corner(obj, 6)
+            stroke(obj, lineCol, 1, 0.55)
+            -- Los textos españoles más largos se ajustan para no cortarse
+            if #obj.Text > 46 then obj.TextSize = 9 end
+            if not obj:GetAttribute("7ZStyled") then
+                obj:SetAttribute("7ZStyled", true)
+                obj.MouseEnter:Connect(function() stroke(obj, accent, 1.5, 0.15) end)
+                obj.MouseLeave:Connect(function() stroke(obj, lineCol, 1, 0.55) end)
+            end
+        elseif obj:IsA("ScrollingFrame") then
+            corner(obj, 8)
+        elseif obj:IsA("Frame") then
+            corner(obj, 8)
+        end
+    end
+
+    -- Ventana, cabecera y franja de acento
+    MainFrame.BackgroundColor3 = Color3.fromRGB(18, 20, 28)
+    corner(MainFrame, 10)
+    stroke(MainFrame, Color3.fromRGB(65, 75, 100), 1.5, 0.35)
+    Header.BackgroundColor3 = Color3.fromRGB(13, 15, 22)
+    corner(Header, 10)
+    stroke(Header, gold, 1, 0.55)
+
+    local accentBar = Instance.new("Frame", Header)
+    accentBar.Name = "AccentBar"
+    accentBar.Size = UDim2.new(1, 0, 0, 2)
+    accentBar.Position = UDim2.new(0, 0, 1, -2)
+    accentBar.BackgroundColor3 = accent
+    accentBar.BorderSizePixel = 0
+    accentBar.ZIndex = 2
+
+    -- Páginas con fondo de tarjeta
+    for _, page in ipairs({PageRaid, PageFarm, PageQuirk, PageSettings, PageInfo}) do
+        page.BackgroundColor3 = cardCol
+        page.BackgroundTransparency = 0.45
+    end
+
+    -- Modales con borde dorado
+    for _, modal in ipairs({TierModal, QuirkTargetModal}) do
+        modal.BackgroundColor3 = Color3.fromRGB(20, 22, 32)
+        stroke(modal, gold, 1.5, 0.35)
+        corner(modal, 12)
+    end
+
+    -- Aplicar estilo a lo que ya existe y a lo que se cree después
+    for _, obj in ipairs(ScreenGui:GetDescendants()) do style(obj) end
+    ScreenGui.DescendantAdded:Connect(style)
+end
+
