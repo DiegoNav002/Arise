@@ -6860,7 +6860,7 @@ pcall(function()
     local panel = mk(MainFrame, "Frame", {
         Name = "ENKY_Modern", Size = UDim2.new(1, -16, 1, -46),
         Position = UDim2.new(0, 8, 0, 42), BackgroundColor3 = dark,
-        BorderSizePixel = 0, ZIndex = 60, Visible = false
+        BorderSizePixel = 0, ZIndex = 60, Visible = true
     })
     mk(panel, "UICorner", { CornerRadius = UDim.new(0, 10) })
 
@@ -6878,9 +6878,9 @@ pcall(function()
     toggleBtn.MouseButton1Click:Connect(function() panel.Visible = not panel.Visible end)
 
     local tabs = {}
-    for i, n in ipairs({ "Incursión", "Granja", "Tirada" }) do
+    for i, n in ipairs({ "Incursión", "Granja", "Tirada", "Ajustes", "Info" }) do
         local b = mk(panel, "TextButton", {
-            Size = UDim2.new(0.31, 0, 0, 24), Position = UDim2.new(0.02 + (i - 1) * 0.33, 0, 0, 4),
+            Size = UDim2.new(0.19, 0, 0, 24), Position = UDim2.new(0.01 + (i - 1) * 0.195, 0, 0, 4),
             BackgroundColor3 = (i == 1) and neon or Color3.fromRGB(20, 40, 80),
             Text = n, TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 10, ZIndex = 62
         })
@@ -6894,13 +6894,13 @@ pcall(function()
         ScrollBarImageColor3 = neon, ZIndex = 61
     })
     local pages = {}
-    for i = 1, 3 do
+    for i = 1, 5 do
         pages[i] = mk(scroll, "Frame", {
             Size = UDim2.new(1, -8, 0, 520), Position = UDim2.new(0, 4, 0, 0),
             BackgroundTransparency = 1, Visible = (i == 1), ZIndex = 61
         })
     end
-    for i = 1, 3 do
+    for i = 1, 5 do
         tabs[i].MouseButton1Click:Connect(function()
             for j = 1, 3 do
                 pages[j].Visible = (j == i)
@@ -7060,6 +7060,43 @@ pcall(function()
             local old = MainFrame:FindFirstChild("ENKY_Panel")
             if old then old.Visible = true end
         end)
+    end
+
+    -- Pestaña Ajustes
+    local settings = {
+        { "Anti-AFK", function() return antiAfkEnabled end, function(v) antiAfkEnabled = v end },
+        { "Prioridad de jefe (Lv.99)", function() return bossPriorityEnabled end, function(v) bossPriorityEnabled = v end },
+        { "Ocultar botín", function() return hideDropsEnabled end, function(v) hideDropsEnabled = v; applyDropVisibility() end },
+        { "Ocultar daño", function() return OPT.hideDamageEnabled == true end, function(v) OPT.hideDamageEnabled = v; if OPT.updateHideDamageVisuals then OPT.updateHideDamageVisuals() end end },
+        { "Ocultar efectos", function() return OPT.hideSkillEffectsEnabled == true end, function(v) OPT.hideSkillEffectsEnabled = v; if OPT.updateHideSkillEffectsVisuals then OPT.updateHideSkillEffectsVisuals() end end },
+        { "Alerta de jefe 1%", function() return BossAlert.enabled == true end, function(v) BossAlert.enabled = v; if BossAlert.updateVisuals then BossAlert.updateVisuals() end end },
+        { "Inicio automático al entrar", function() return autoStartOnJoin end, function(v) autoStartOnJoin = v; saveBotState(isRaidRunning) end },
+        { "Reunión automática", function() return autoRejoinIndex == 2 end, function(v) autoRejoinIndex = v and 2 or 1; updateAutoRejoinButtonVisuals() end }
+    }
+    for i, d in ipairs(settings) do
+        local c = card(pages[4], 4 + (i - 1) * 48, d[1], "Toca el switch para activarlo")
+        sw(c, d[2], d[3])
+    end
+
+    -- Pestaña Info
+    local infoLines = {
+        "⚡ ENKY HUB · ARISE",
+        "Modo: " .. ((raidTypeIndex == 1) and "Incursión normal" or "Torre de ascensión"),
+        "Mapa: " .. (getCurrentMapConfig().name or ""),
+        "Nivel: " .. getSelectedTiersText(),
+        "Incursión: " .. (isRaidRunning and "ACTIVA" or "Inactiva"),
+        "Farmeo: " .. (isFarmRunning and "ACTIVO" or "Inactivo"),
+        "Reroll: " .. (isQuirkRunning and "ACTIVO" or "Inactivo"),
+        "Anti-AFK: " .. (antiAfkEnabled and "Activo" or "Desactivado"),
+        "Drops ocultos: " .. (hideDropsEnabled and "SÍ" or "NO"),
+        "Radar: " .. ((OPT.db and OPT.db.autoLoop) and "Activo" or "Inactivo")
+    }
+    for i, line in ipairs(infoLines) do
+        mk(pages[5], "TextLabel", {
+            Size = UDim2.new(1, -16, 0, 22), Position = UDim2.new(0, 8, 0, 4 + (i - 1) * 26),
+            BackgroundTransparency = 1, Text = line, TextColor3 = (i == 1) and neon or soft,
+            Font = Enum.Font.GothamBold, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 62
+        })
     end
 
     scroll.CanvasSize = UDim2.new(0, 0, 0, 560)
