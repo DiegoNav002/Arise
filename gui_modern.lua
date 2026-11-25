@@ -6911,9 +6911,39 @@ pcall(function()
     end
 
     local switches = { {}, {}, {}, {}, {} }
+    local pops = {}
+    ENKY_MultiMaps.normal[10] = true
+    ENKY_MultiMaps.tower[21] = true
+    ENKY_MultiPresets[1] = true
+    ENKY_MultiSpeeds[1] = true
+    ENKY_MultiFarm[1] = true
+
+    for i = 1, 5 do tabs[i].Visible = false end
+    local navs = { TabRaidBtn, TabFarmBtn, TabQuirkBtn, TabSettingBtn, TabInfoBtn }
+    local function showPage(i)
+        for j = 1, 5 do pages[j].Visible = (j == i) end
+        for j, b in ipairs(navs) do
+            b.BackgroundColor3 = (j == i) and Color3.fromRGB(0, 115, 230) or Color3.fromRGB(12, 26, 52)
+        end
+    end
+    for i, b in ipairs(navs) do
+        b.MouseButton1Click:Connect(function() showPage(i) end)
+    end
+    showPage(1)
+
+    local sectionTexts = { "⚔️ Incursiones simultáneas", "🌍 Farmeos simultáneos", "🔮 Rolls simultáneos", "⚙️ Ajustes", "ℹ️ Info" }
+    for i = 1, 5 do
+        mk(pages[i], "TextLabel", {
+            Size = UDim2.new(0.55, 0, 0, 18), Position = UDim2.new(0, 4, 0, 4),
+            BackgroundTransparency = 1, Text = sectionTexts[i], TextColor3 = neon,
+            Font = Enum.Font.GothamBold, TextSize = 11,
+            TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 62
+        })
+    end
+
     local function card(page, y, title, meta)
         local c = mk(page, "Frame", {
-            Size = UDim2.new(1, -4, 0, 72), Position = UDim2.new(0, 2, 0, y),
+            Size = UDim2.new(1, -4, 0, 88), Position = UDim2.new(0, 2, 0, y),
             BackgroundColor3 = cardC, BorderSizePixel = 0, ZIndex = 62
         })
         mk(c, "UICorner", { CornerRadius = UDim.new(0, 8) })
@@ -6929,12 +6959,12 @@ pcall(function()
             Font = Enum.Font.Gotham, TextSize = 8, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 63
         })
         local bar = mk(c, "Frame", {
-            Size = UDim2.new(1, -16, 0, 3), Position = UDim2.new(0, 8, 0, 52),
+            Size = UDim2.new(1, -16, 0, 3), Position = UDim2.new(0, 8, 0, 68),
             BackgroundColor3 = Color3.fromRGB(6, 16, 34), ZIndex = 63
         })
         local fill = mk(bar, "Frame", { Size = UDim2.new(0, 0, 1, 0), BackgroundColor3 = neon, ZIndex = 64 })
         local st = mk(c, "TextLabel", {
-            Size = UDim2.new(1, -46, 0, 12), Position = UDim2.new(0, 8, 0, 57),
+            Size = UDim2.new(1, -46, 0, 12), Position = UDim2.new(0, 8, 0, 73),
             BackgroundTransparency = 1, Text = "Estado: Inactivo", TextColor3 = soft,
             Font = Enum.Font.Gotham, TextSize = 8, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 63
         })
@@ -6991,19 +7021,21 @@ pcall(function()
 
     local function dropdown(parent, x, y, w, options, isChecked, setChecked, unit)
         local btn = mk(parent, "TextButton", {
-            Size = UDim2.new(0, w, 0, 16), Position = UDim2.new(0, x, 0, y),
+            Size = UDim2.new(0, w, 0, 22), Position = UDim2.new(0, x, 0, y),
             BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "▾",
-            TextColor3 = soft, Font = Enum.Font.GothamBold, TextSize = 7, ZIndex = 65
+            TextColor3 = soft, Font = Enum.Font.GothamBold, TextSize = 9, ZIndex = 65
         })
-        local pop = mk(parent, "Frame", {
-            Size = UDim2.new(0, 190, 0, math.min(#options * 16 + 6, 128)),
-            Position = UDim2.new(0, x, 0, y + 17), BackgroundColor3 = Color3.fromRGB(10, 24, 50),
-            BorderSizePixel = 1, BorderColor3 = neon, ZIndex = 70, Visible = false
+        mk(btn, "UICorner", { CornerRadius = UDim.new(0, 5) })
+        local pop = mk(panel, "Frame", {
+            Size = UDim2.new(0, 240, 0, math.min(#options * 22 + 8, 176)),
+            BackgroundColor3 = Color3.fromRGB(10, 24, 50),
+            BorderSizePixel = 2, BorderColor3 = neon, ZIndex = 100, Visible = false
         })
+        table.insert(pops, pop)
         local ps = mk(pop, "ScrollingFrame", {
-            Size = UDim2.new(1, -4, 1, -4), Position = UDim2.new(0, 2, 0, 2),
-            BackgroundTransparency = 1, BorderSizePixel = 0, ScrollBarThickness = 3,
-            ScrollBarImageColor3 = neon, ZIndex = 71
+            Size = UDim2.new(1, -6, 1, -6), Position = UDim2.new(0, 3, 0, 3),
+            BackgroundTransparency = 1, BorderSizePixel = 0, ScrollBarThickness = 6,
+            ScrollBarImageColor3 = neon, ZIndex = 101
         })
         local function refresh()
             local n = 0
@@ -7017,11 +7049,11 @@ pcall(function()
         end
         for i, label in ipairs(options) do
             local ob = mk(ps, "TextButton", {
-                Size = UDim2.new(1, -4, 0, 14), Position = UDim2.new(0, 2, 0, (i - 1) * 16),
+                Size = UDim2.new(1, -6, 0, 20), Position = UDim2.new(0, 3, 0, (i - 1) * 22),
                 BackgroundColor3 = Color3.fromRGB(16, 32, 62),
                 Text = (isChecked(i) and "✓ " or "   ") .. label,
-                TextColor3 = soft, Font = Enum.Font.Gotham, TextSize = 7,
-                TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 72
+                TextColor3 = soft, Font = Enum.Font.Gotham, TextSize = 10,
+                TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 102
             })
             ob.MouseButton1Click:Connect(function()
                 setChecked(i, not isChecked(i))
@@ -7029,8 +7061,18 @@ pcall(function()
                 refresh()
             end)
         end
-        ps.CanvasSize = UDim2.new(0, 0, 0, #options * 16 + 4)
-        btn.MouseButton1Click:Connect(function() pop.Visible = not pop.Visible end)
+        ps.CanvasSize = UDim2.new(0, 0, 0, #options * 22 + 6)
+        btn.MouseButton1Click:Connect(function()
+            for _, other in ipairs(pops) do
+                if other ~= pop then other.Visible = false end
+            end
+            if not pop.Visible then
+                local ap = btn.AbsolutePosition
+                local pp = panel.AbsolutePosition
+                pop.Position = UDim2.new(0, ap.X - pp.X, 0, ap.Y - pp.Y + 24)
+            end
+            pop.Visible = not pop.Visible
+        end)
         refresh()
         return btn
     end
@@ -7067,7 +7109,7 @@ pcall(function()
         if v then anim(s1, f1, function() return isRaidRunning end, "Buscando incursión") end
     end)
 
-    local c2, s2, f2 = card(pages[1], 102, "🗼 Torre de ascensión", "Selecciona torres y niveles")
+    local c2, s2, f2 = card(pages[1], 120, "🗼 Torre de ascensión", "Selecciona torres y niveles")
     dropdown(c2, 8, 36, 120, towerNames,
         function(i) return ENKY_MultiMaps.tower[i] == true end,
         function(i, v) ENKY_MultiMaps.tower[i] = v or nil end, "torres")
@@ -7082,7 +7124,7 @@ pcall(function()
         if v then anim(s2, f2, function() return isRaidRunning end, "Buscando torre") end
     end)
 
-    local c3, s3, f3 = card(pages[1], 180, "🔁 Salto de servidor", "Si no aparece la puerta deseada")
+    local c3, s3, f3 = card(pages[1], 216, "🔁 Salto de servidor", "Si no aparece la puerta deseada")
     sw(c3, 1, function() return autoRejoinIndex == 2 end, function(v)
         autoRejoinIndex = v and 2 or 1
         updateAutoRejoinButtonVisuals()
@@ -7099,7 +7141,7 @@ pcall(function()
         { "👤 Solo normales", "Objetivo: monstruos normales" }
     }
     for i, d in ipairs(farmCards) do
-        local c, st, fl = card(pages[2], 24 + (i - 1) * 80, d[1], d[2])
+        local c, st, fl = card(pages[2], 24 + (i - 1) * 92, d[1], d[2])
         dropdown(c, 8, 36, 180, names(FARM_FILTER_MODES),
             function(k) return ENKY_MultiFarm[k] == true end,
             function(k, v) ENKY_MultiFarm[k] = v or nil end, "filtros")
@@ -7113,7 +7155,7 @@ pcall(function()
             if v then anim(st, fl, function() return isFarmRunning end, "Farmeando") end
         end)
     end
-    local cR, sR, fR = card(pages[2], 264, "🐉 Radar de Dragon Ball", "7 esferas gratis")
+    local cR, sR, fR = card(pages[2], 300, "🐉 Radar de Dragon Ball", "7 esferas gratis")
     sw(cR, 2, function() return OPT.db and OPT.db.autoLoop == true end, function(v)
         if OPT.db then
             if v then OPT.db.startLoop() else OPT.db.autoLoop = false end
@@ -7131,7 +7173,7 @@ pcall(function()
         { "🛡️ Grado de equipo", "Ranura 1 (Piedra G 1)", 3 }
     }
     for _, d in ipairs(rollCards) do
-        local c, st, fl = card(pages[3], 24 + (d[3] - 1) * 80, d[1], d[2])
+        local c, st, fl = card(pages[3], 24 + (d[3] - 1) * 92, d[1], d[2])
         local presets = (d[3] == 3) and gradeNames or presetNames
         dropdown(c, 8, 36, 140, presets,
             function(i) return ENKY_MultiPresets[i] == true end,
@@ -7163,7 +7205,7 @@ pcall(function()
         { "Reunión automática", function() return autoRejoinIndex == 2 end, function(v) autoRejoinIndex = v and 2 or 1; updateAutoRejoinButtonVisuals() end }
     }
     for i, d in ipairs(settings) do
-        local c = card(pages[4], 24 + (i - 1) * 50, d[1], "Switch de ajuste")
+        local c = card(pages[4], 24 + (i - 1) * 92, d[1], "Switch de ajuste")
         sw(c, 4, d[2], d[3])
     end
     onS.MouseButton1Click:Connect(function() for _, x in ipairs(switches[4]) do if not x.isOn() then x.onChange(true); x.setVis(true) end end end)
