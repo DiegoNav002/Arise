@@ -1,5 +1,5 @@
 -- ====================================================================
--- ⚡ 7Z HUB v3.1
+-- ⚡ ENKY HUB v3.1
 -- ====================================================================
 
 -- Non-blocking game load check (safe on Delta & mobile)
@@ -2568,7 +2568,7 @@ ScreenGui.Parent = targetParent
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 290, 0, 260)
 MainFrame.Position = UDim2.new(0.72, 0, 0.22, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+MainFrame.BackgroundColor3 = Color3.fromRGB(6, 14, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
 MainFrame.Active = true
@@ -2579,7 +2579,7 @@ Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 -- Header
 local Header = Instance.new("Frame")
 Header.Size = UDim2.new(1, 0, 0, 30)
-Header.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
+Header.BackgroundColor3 = Color3.fromRGB(8, 18, 38)
 Header.BorderSizePixel = 0
 Header.Parent = MainFrame
 Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 8)
@@ -2588,8 +2588,8 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -74, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "⚡ 7Z HUB"
-Title.TextColor3 = Color3.fromRGB(255, 175, 0)
+Title.Text = "⚡ ENKY HUB"
+Title.TextColor3 = Color3.fromRGB(0, 150, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -2599,9 +2599,9 @@ do
     local minBtn = Instance.new("TextButton")
     minBtn.Size = UDim2.new(0, 24, 0, 22)
     minBtn.Position = UDim2.new(1, -52, 0, 4)
-    minBtn.BackgroundColor3 = Color3.fromRGB(36, 38, 48)
+    minBtn.BackgroundColor3 = Color3.fromRGB(14, 40, 85)
     minBtn.Text = "—"
-    minBtn.TextColor3 = Color3.fromRGB(235, 215, 150)
+    minBtn.TextColor3 = Color3.fromRGB(180, 225, 255)
     minBtn.Font = Enum.Font.GothamBold
     minBtn.TextSize = 13
     minBtn.Parent = Header
@@ -2639,7 +2639,7 @@ TabBar.Parent = MainFrame
 local TabRaidBtn = Instance.new("TextButton")
 TabRaidBtn.Size = UDim2.new(0.188, 0, 1, 0)
 TabRaidBtn.Position = UDim2.new(0, 0, 0, 0)
-TabRaidBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 58)
+TabRaidBtn.BackgroundColor3 = Color3.fromRGB(18, 38, 72)
 TabRaidBtn.Text = "⚔️ Incursión"
 TabRaidBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabRaidBtn.Font = Enum.Font.GothamBold
@@ -2650,7 +2650,7 @@ Instance.new("UICorner", TabRaidBtn).CornerRadius = UDim.new(0, 5)
 local TabFarmBtn = Instance.new("TextButton")
 TabFarmBtn.Size = UDim2.new(0.188, 0, 1, 0)
 TabFarmBtn.Position = UDim2.new(0.203, 0, 0, 0)
-TabFarmBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+TabFarmBtn.BackgroundColor3 = Color3.fromRGB(14, 28, 55)
 TabFarmBtn.Text = "🌍 Granja"
 TabFarmBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 TabFarmBtn.Font = Enum.Font.GothamBold
@@ -2661,7 +2661,7 @@ Instance.new("UICorner", TabFarmBtn).CornerRadius = UDim.new(0, 5)
 local TabQuirkBtn = Instance.new("TextButton")
 TabQuirkBtn.Size = UDim2.new(0.188, 0, 1, 0)
 TabQuirkBtn.Position = UDim2.new(0.406, 0, 0, 0)
-TabQuirkBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+TabQuirkBtn.BackgroundColor3 = Color3.fromRGB(14, 28, 55)
 TabQuirkBtn.Text = "🔮 Tirada"
 TabQuirkBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 TabQuirkBtn.Font = Enum.Font.GothamBold
@@ -2672,7 +2672,7 @@ Instance.new("UICorner", TabQuirkBtn).CornerRadius = UDim.new(0, 5)
 local TabSettingBtn = Instance.new("TextButton")
 TabSettingBtn.Size = UDim2.new(0.188, 0, 1, 0)
 TabSettingBtn.Position = UDim2.new(0.609, 0, 0, 0)
-TabSettingBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+TabSettingBtn.BackgroundColor3 = Color3.fromRGB(14, 28, 55)
 TabSettingBtn.Text = "⚙️ Ajustes"
 TabSettingBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 TabSettingBtn.Font = Enum.Font.GothamBold
@@ -2683,7 +2683,7 @@ Instance.new("UICorner", TabSettingBtn).CornerRadius = UDim.new(0, 5)
 local TabInfoBtn = Instance.new("TextButton")
 TabInfoBtn.Size = UDim2.new(0.188, 0, 1, 0)
 TabInfoBtn.Position = UDim2.new(0.812, 0, 0, 0)
-TabInfoBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+TabInfoBtn.BackgroundColor3 = Color3.fromRGB(14, 28, 55)
 TabInfoBtn.Text = "ℹ️ Info"
 TabInfoBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 TabInfoBtn.Font = Enum.Font.GothamBold
@@ -2704,7 +2704,7 @@ PageRaid.Parent = MainFrame
 TypeSelector = Instance.new("TextButton")
 TypeSelector.Size = UDim2.new(1, 0, 0, 24)
 TypeSelector.Position = UDim2.new(0, 0, 0, 0)
-TypeSelector.BackgroundColor3 = Color3.fromRGB(35, 42, 55)
+TypeSelector.BackgroundColor3 = Color3.fromRGB(16, 40, 78)
 TypeSelector.Text = "Modo: ⚔️ Incursión normal"
 TypeSelector.TextColor3 = Color3.fromRGB(100, 210, 255)
 TypeSelector.Font = Enum.Font.GothamBold
@@ -2715,7 +2715,7 @@ Instance.new("UICorner", TypeSelector).CornerRadius = UDim.new(0, 5)
 MapSelector = Instance.new("TextButton")
 MapSelector.Size = UDim2.new(1, 0, 0, 24)
 MapSelector.Position = UDim2.new(0, 0, 0, 28)
-MapSelector.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+MapSelector.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
 MapSelector.Text = "Mapa: 21,Ciudad maldita"
 MapSelector.TextColor3 = Color3.fromRGB(100, 210, 255)
 MapSelector.Font = Enum.Font.GothamBold
@@ -2728,7 +2728,7 @@ TierSelector.Size = UDim2.new(1, 0, 0, 24)
 TierSelector.Position = UDim2.new(0, 0, 0, 56)
 TierSelector.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 TierSelector.Text = "Nivel: Detección automática"
-TierSelector.TextColor3 = Color3.fromRGB(255, 215, 0)
+TierSelector.TextColor3 = Color3.fromRGB(80, 210, 255)
 TierSelector.Font = Enum.Font.GothamBold
 TierSelector.TextSize = 10
 TierSelector.Parent = PageRaid
@@ -2764,7 +2764,7 @@ PageFarm.Position = UDim2.new(0, 8, 0, 66)
 PageFarm.BackgroundTransparency = 1
 PageFarm.BorderSizePixel = 0
 PageFarm.ScrollBarThickness = 6
-PageFarm.ScrollBarImageColor3 = Color3.fromRGB(255, 175, 0)
+PageFarm.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
 PageFarm.ScrollBarImageTransparency = 0.3
 PageFarm.CanvasSize = UDim2.new(0, 0, 0, 315)
 PageFarm.Visible = false
@@ -2773,7 +2773,7 @@ PageFarm.Parent = MainFrame
 local FarmFilterBtn = Instance.new("TextButton")
 FarmFilterBtn.Size = UDim2.new(1, -6, 0, 26)
 FarmFilterBtn.Position = UDim2.new(0, 0, 0, 0)
-FarmFilterBtn.BackgroundColor3 = Color3.fromRGB(35, 45, 55)
+FarmFilterBtn.BackgroundColor3 = Color3.fromRGB(16, 40, 78)
 FarmFilterBtn.Text = "Objetivo: Todos los monstruos"
 FarmFilterBtn.TextColor3 = Color3.fromRGB(110, 220, 160)
 FarmFilterBtn.Font = Enum.Font.GothamBold
@@ -2786,7 +2786,7 @@ MobCountLabel.Size = UDim2.new(1, -6, 0, 20)
 MobCountLabel.Position = UDim2.new(0, 0, 0, 30)
 MobCountLabel.BackgroundTransparency = 1
 MobCountLabel.Text = "Monstruos vivos en el mapa: --"
-MobCountLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+MobCountLabel.TextColor3 = Color3.fromRGB(120, 210, 255)
 MobCountLabel.Font = Enum.Font.Gotham
 MobCountLabel.TextSize = 10
 MobCountLabel.Parent = PageFarm
@@ -2816,7 +2816,7 @@ do
     local dbDiv = Instance.new("Frame")
     dbDiv.Size = UDim2.new(1, -6, 0, 1)
     dbDiv.Position = UDim2.new(0, 0, 0, 124)
-    dbDiv.BackgroundColor3 = Color3.fromRGB(55, 55, 70)
+    dbDiv.BackgroundColor3 = Color3.fromRGB(30, 60, 110)
     dbDiv.BorderSizePixel = 0
     dbDiv.Parent = PageFarm
 
@@ -2825,7 +2825,7 @@ do
     dbHdr.Position = UDim2.new(0, 0, 0, 129)
     dbHdr.BackgroundTransparency = 1
     dbHdr.Text = "🐉 Radar de Dragon Ball (7 esferas gratis)"
-    dbHdr.TextColor3 = Color3.fromRGB(255, 200, 65)
+    dbHdr.TextColor3 = Color3.fromRGB(80, 200, 255)
     dbHdr.Font = Enum.Font.GothamBold
     dbHdr.TextSize = 10
     dbHdr.TextXAlignment = Enum.TextXAlignment.Left
@@ -2847,7 +2847,7 @@ do
     local dbBox = Instance.new("Frame")
     dbBox.Size = UDim2.new(1, -6, 0, 74)
     dbBox.Position = UDim2.new(0, 0, 0, 164)
-    dbBox.BackgroundColor3 = Color3.fromRGB(24, 26, 35)
+    dbBox.BackgroundColor3 = Color3.fromRGB(10, 24, 48)
     dbBox.BorderSizePixel = 0
     dbBox.Parent = PageFarm
     Instance.new("UICorner", dbBox).CornerRadius = UDim.new(0, 5)
@@ -2869,7 +2869,7 @@ do
     local dbScan = Instance.new("TextButton")
     dbScan.Size = UDim2.new(0.47, 0, 0, 26)
     dbScan.Position = UDim2.new(0, 0, 0, 243)
-    dbScan.BackgroundColor3 = Color3.fromRGB(40, 60, 90)
+    dbScan.BackgroundColor3 = Color3.fromRGB(12, 50, 110)
     dbScan.Text = "🔍 Escanear radar"
     dbScan.TextColor3 = Color3.fromRGB(210, 235, 255)
     dbScan.Font = Enum.Font.GothamBold
@@ -2893,7 +2893,7 @@ do
     local dbAuto = Instance.new("TextButton")
     dbAuto.Size = UDim2.new(1, -6, 0, 26)
     dbAuto.Position = UDim2.new(0, 0, 0, 274)
-    dbAuto.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    dbAuto.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
     dbAuto.Text = "♻️ Recolección automática: DESACTIVADA (manual)"
     dbAuto.TextColor3 = Color3.fromRGB(180, 180, 180)
     dbAuto.Font = Enum.Font.GothamBold
@@ -2912,7 +2912,7 @@ PageQuirk.Position = UDim2.new(0, 8, 0, 66)
 PageQuirk.BackgroundTransparency = 1
 PageQuirk.BorderSizePixel = 0
 PageQuirk.ScrollBarThickness = 6
-PageQuirk.ScrollBarImageColor3 = Color3.fromRGB(255, 175, 0)
+PageQuirk.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
 PageQuirk.ScrollBarImageTransparency = 0.3
 PageQuirk.CanvasSize = UDim2.new(0, 0, 0, 250)
 PageQuirk.Visible = false
@@ -2921,9 +2921,9 @@ PageQuirk.Parent = MainFrame
 local QuirkTypeBtn = Instance.new("TextButton")
 QuirkTypeBtn.Size = UDim2.new(1, -6, 0, 24)
 QuirkTypeBtn.Position = UDim2.new(0, 0, 0, 0)
-QuirkTypeBtn.BackgroundColor3 = Color3.fromRGB(45, 35, 60)
+QuirkTypeBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 75)
 QuirkTypeBtn.Text = "🔮 Modo: 👤 Rasgo de héroe"
-QuirkTypeBtn.TextColor3 = Color3.fromRGB(220, 170, 255)
+QuirkTypeBtn.TextColor3 = Color3.fromRGB(170, 215, 255)
 QuirkTypeBtn.Font = Enum.Font.GothamBold
 QuirkTypeBtn.TextSize = 10
 QuirkTypeBtn.Parent = PageQuirk
@@ -2956,7 +2956,7 @@ QuirkCoreLabel.Size = UDim2.new(1, -6, 0, 16)
 QuirkCoreLabel.Position = UDim2.new(0, 0, 0, 74)
 QuirkCoreLabel.BackgroundTransparency = 1
 QuirkCoreLabel.Text = "Núcleos disponibles: Núcleo rojo x0"
-QuirkCoreLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+QuirkCoreLabel.TextColor3 = Color3.fromRGB(120, 210, 255)
 QuirkCoreLabel.Font = Enum.Font.Gotham
 QuirkCoreLabel.TextSize = 9
 QuirkCoreLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -2967,7 +2967,7 @@ QuirkPresetBtn.Size = UDim2.new(1, -6, 0, 24)
 QuirkPresetBtn.Position = UDim2.new(0, 0, 0, 94)
 QuirkPresetBtn.BackgroundColor3 = Color3.fromRGB(45, 50, 35)
 QuirkPresetBtn.Text = "🎯 Objetivo: 🌟 Solo mítico (Q5+)"
-QuirkPresetBtn.TextColor3 = Color3.fromRGB(255, 215, 100)
+QuirkPresetBtn.TextColor3 = Color3.fromRGB(120, 210, 255)
 QuirkPresetBtn.Font = Enum.Font.GothamBold
 QuirkPresetBtn.TextSize = 10
 QuirkPresetBtn.Parent = PageQuirk
@@ -2976,7 +2976,7 @@ Instance.new("UICorner", QuirkPresetBtn).CornerRadius = UDim.new(0, 5)
 local QuirkPickTargetBtn = Instance.new("TextButton")
 QuirkPickTargetBtn.Size = UDim2.new(1, -6, 0, 24)
 QuirkPickTargetBtn.Position = UDim2.new(0, 0, 0, 122)
-QuirkPickTargetBtn.BackgroundColor3 = Color3.fromRGB(35, 40, 55)
+QuirkPickTargetBtn.BackgroundColor3 = Color3.fromRGB(16, 40, 78)
 QuirkPickTargetBtn.Text = "📝 Elegir / fijar rasgos específicos"
 QuirkPickTargetBtn.TextColor3 = Color3.fromRGB(180, 200, 255)
 QuirkPickTargetBtn.Font = Enum.Font.GothamBold
@@ -2987,7 +2987,7 @@ Instance.new("UICorner", QuirkPickTargetBtn).CornerRadius = UDim.new(0, 5)
 local QuirkSpeedBtn = Instance.new("TextButton")
 QuirkSpeedBtn.Size = UDim2.new(1, -6, 0, 24)
 QuirkSpeedBtn.Position = UDim2.new(0, 0, 0, 150)
-QuirkSpeedBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+QuirkSpeedBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
 QuirkSpeedBtn.Text = "⚡ Velocidad: RÁPIDA (0.15s)"
 QuirkSpeedBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
 QuirkSpeedBtn.Font = Enum.Font.GothamBold
@@ -3026,7 +3026,7 @@ PageSettings.Position = UDim2.new(0, 8, 0, 66)
 PageSettings.BackgroundTransparency = 1
 PageSettings.BorderSizePixel = 0
 PageSettings.ScrollBarThickness = 6
-PageSettings.ScrollBarImageColor3 = Color3.fromRGB(255, 175, 0)
+PageSettings.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
 PageSettings.ScrollBarImageTransparency = 0.3
 PageSettings.CanvasSize = UDim2.new(0, 0, 0, 306)
 PageSettings.Visible = false
@@ -3068,7 +3068,7 @@ Instance.new("UICorner", BossPriorityBtn).CornerRadius = UDim.new(0, 5)
 local AutoRejoinBtn = Instance.new("TextButton")
 AutoRejoinBtn.Size = UDim2.new(1, -6, 0, 26)
 AutoRejoinBtn.Position = UDim2.new(0, 0, 0, 90)
-AutoRejoinBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+AutoRejoinBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
 AutoRejoinBtn.Text = "Reunión automática: NO (esperar en el servidor)"
 AutoRejoinBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 AutoRejoinBtn.Font = Enum.Font.GothamBold
@@ -3090,7 +3090,7 @@ Instance.new("UICorner", AutoStartBtn).CornerRadius = UDim.new(0, 5)
 local HideDropsBtn = Instance.new("TextButton")
 HideDropsBtn.Size = UDim2.new(1, -6, 0, 26)
 HideDropsBtn.Position = UDim2.new(0, 0, 0, 150)
-HideDropsBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+HideDropsBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
 HideDropsBtn.Text = "Ocultar botín: DESACTIVADO (NO - mostrar)"
 HideDropsBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 HideDropsBtn.Font = Enum.Font.GothamBold
@@ -3102,7 +3102,7 @@ do
     local hdBtn = Instance.new("TextButton")
     hdBtn.Size = UDim2.new(1, -6, 0, 26)
     hdBtn.Position = UDim2.new(0, 0, 0, 180)
-    hdBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    hdBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
     hdBtn.Text = "Ocultar daño: DESACTIVADO (NO - mostrar)"
     hdBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
     hdBtn.Font = Enum.Font.GothamBold
@@ -3114,7 +3114,7 @@ do
     local hseBtn = Instance.new("TextButton")
     hseBtn.Size = UDim2.new(1, -6, 0, 26)
     hseBtn.Position = UDim2.new(0, 0, 0, 210)
-    hseBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    hseBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
     hseBtn.Text = "Ocultar efectos: DESACTIVADO (NO - mostrar)"
     hseBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
     hseBtn.Font = Enum.Font.GothamBold
@@ -3138,9 +3138,9 @@ do
     local codesBtn = Instance.new("TextButton")
     codesBtn.Size = UDim2.new(1, -6, 0, 26)
     codesBtn.Position = UDim2.new(0, 0, 0, 270)
-    codesBtn.BackgroundColor3 = Color3.fromRGB(70, 52, 110)
+    codesBtn.BackgroundColor3 = Color3.fromRGB(20, 50, 100)
     codesBtn.Text = "🎁 Canjear todos los códigos"
-    codesBtn.TextColor3 = Color3.fromRGB(235, 220, 255)
+    codesBtn.TextColor3 = Color3.fromRGB(225, 240, 255)
     codesBtn.Font = Enum.Font.GothamBold
     codesBtn.TextSize = 10
     codesBtn.Parent = PageSettings
@@ -3174,7 +3174,7 @@ InfoText.Parent = PageInfo
 TierModal = Instance.new("Frame")
 TierModal.Size = UDim2.new(1, -16, 0, 184)
 TierModal.Position = UDim2.new(0, 8, 0, 66)
-TierModal.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+TierModal.BackgroundColor3 = Color3.fromRGB(8, 18, 38)
 TierModal.BorderSizePixel = 0
 TierModal.Visible = false
 TierModal.Active = true
@@ -3187,7 +3187,7 @@ ModalTitle.Size = UDim2.new(1, -16, 0, 22)
 ModalTitle.Position = UDim2.new(0, 8, 0, 4)
 ModalTitle.BackgroundTransparency = 1
 ModalTitle.Text = "🎯 Elige niveles de incursión (puedes marcar varios, p. ej., D, B)"
-ModalTitle.TextColor3 = Color3.fromRGB(255, 215, 0)
+ModalTitle.TextColor3 = Color3.fromRGB(80, 210, 255)
 ModalTitle.Font = Enum.Font.GothamBold
 ModalTitle.TextSize = 11
 ModalTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -3207,7 +3207,7 @@ local function updateTierButtonVisuals()
                 btn.BackgroundColor3 = Color3.fromRGB(45, 140, 60)
                 btn.TextColor3 = Color3.fromRGB(255, 255, 255)
             else
-                btn.BackgroundColor3 = Color3.fromRGB(32, 32, 42)
+                btn.BackgroundColor3 = Color3.fromRGB(14, 28, 55)
                 btn.TextColor3 = Color3.fromRGB(140, 140, 150)
             end
         end
@@ -3217,7 +3217,7 @@ local function updateTierButtonVisuals()
     if curMap.isEvent then
         TierSelector.TextColor3 = Color3.fromRGB(180, 180, 180)
     else
-        TierSelector.TextColor3 = Color3.fromRGB(255, 215, 0)
+        TierSelector.TextColor3 = Color3.fromRGB(80, 210, 255)
     end
 end
 
@@ -3255,7 +3255,7 @@ end
 local SelectAllBtn = Instance.new("TextButton")
 SelectAllBtn.Size = UDim2.new(0, 78, 0, 26)
 SelectAllBtn.Position = UDim2.new(0, 8, 0, 96)
-SelectAllBtn.BackgroundColor3 = Color3.fromRGB(40, 50, 70)
+SelectAllBtn.BackgroundColor3 = Color3.fromRGB(16, 45, 95)
 SelectAllBtn.Text = "Seleccionar todo"
 SelectAllBtn.TextColor3 = Color3.fromRGB(140, 200, 255)
 SelectAllBtn.Font = Enum.Font.GothamBold
@@ -3338,9 +3338,9 @@ local QuirkTargetModal = Instance.new("Frame")
 local QM = {}
 QuirkTargetModal.Size = UDim2.new(0, 280, 0, 250)
 QuirkTargetModal.Position = UDim2.new(0.5, -140, 0.5, -125)
-QuirkTargetModal.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+QuirkTargetModal.BackgroundColor3 = Color3.fromRGB(8, 18, 38)
 QuirkTargetModal.BorderSizePixel = 1
-QuirkTargetModal.BorderColor3 = Color3.fromRGB(90, 70, 130)
+QuirkTargetModal.BorderColor3 = Color3.fromRGB(20, 80, 160)
 QuirkTargetModal.Visible = false
 QuirkTargetModal.ZIndex = 25
 QuirkTargetModal.Parent = ScreenGui
@@ -3351,7 +3351,7 @@ QModalTitle.Size = UDim2.new(1, -16, 0, 20)
 QModalTitle.Position = UDim2.new(0, 8, 0, 6)
 QModalTitle.BackgroundTransparency = 1
 QModalTitle.Text = "🎯 Seleccionar rasgos objetivo (autodetención)"
-QModalTitle.TextColor3 = Color3.fromRGB(255, 215, 100)
+QModalTitle.TextColor3 = Color3.fromRGB(120, 210, 255)
 QModalTitle.Font = Enum.Font.GothamBold
 QModalTitle.TextSize = 11
 QModalTitle.ZIndex = 26
@@ -3380,7 +3380,7 @@ QM.MythicBtn.Size = UDim2.new(0.24, 0, 1, 0)
 QM.MythicBtn.Position = UDim2.new(0, 0, 0, 0)
 QM.MythicBtn.BackgroundColor3 = Color3.fromRGB(60, 45, 25)
 QM.MythicBtn.Text = "🌟 Q5+"
-QM.MythicBtn.TextColor3 = Color3.fromRGB(255, 200, 80)
+QM.MythicBtn.TextColor3 = Color3.fromRGB(120, 215, 255)
 QM.MythicBtn.Font = Enum.Font.GothamBold
 QM.MythicBtn.TextSize = 9
 QM.MythicBtn.ZIndex = 26
@@ -3392,7 +3392,7 @@ QM.LegBtn.Size = UDim2.new(0.24, 0, 1, 0)
 QM.LegBtn.Position = UDim2.new(0.25, 0, 0, 0)
 QM.LegBtn.BackgroundColor3 = Color3.fromRGB(50, 35, 60)
 QM.LegBtn.Text = "✨ Q4+"
-QM.LegBtn.TextColor3 = Color3.fromRGB(220, 160, 255)
+QM.LegBtn.TextColor3 = Color3.fromRGB(170, 215, 255)
 QM.LegBtn.Font = Enum.Font.GothamBold
 QM.LegBtn.TextSize = 9
 QM.LegBtn.ZIndex = 26
@@ -3426,10 +3426,10 @@ Instance.new("UICorner", QM.ClearBtn).CornerRadius = UDim.new(0, 4)
 QM.Scroll = Instance.new("ScrollingFrame")
 QM.Scroll.Size = UDim2.new(1, -16, 0, 145)
 QM.Scroll.Position = UDim2.new(0, 8, 0, 68)
-QM.Scroll.BackgroundColor3 = Color3.fromRGB(14, 14, 18)
+QM.Scroll.BackgroundColor3 = Color3.fromRGB(6, 16, 34)
 QM.Scroll.BorderSizePixel = 0
 QM.Scroll.ScrollBarThickness = 6
-QM.Scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 175, 0)
+QM.Scroll.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
 QM.Scroll.ScrollBarImageTransparency = 0.3
 QM.Scroll.ZIndex = 26
 QM.Scroll.Parent = QuirkTargetModal
@@ -3461,10 +3461,10 @@ local function switchTab(tabIndex)
     TierModal.Visible = false
     QuirkTargetModal.Visible = false
 
-    local activeBg = Color3.fromRGB(50, 55, 75)
-    local inactiveBg = Color3.fromRGB(30, 30, 38)
+    local activeBg = Color3.fromRGB(0, 115, 230)
+    local inactiveBg = Color3.fromRGB(12, 26, 52)
     local activeTxt = Color3.fromRGB(255, 255, 255)
-    local inactiveTxt = Color3.fromRGB(180, 180, 180)
+    local inactiveTxt = Color3.fromRGB(160, 190, 230)
 
     TabRaidBtn.BackgroundColor3 = (tabIndex == 1) and activeBg or inactiveBg
     TabRaidBtn.TextColor3 = (tabIndex == 1) and activeTxt or inactiveTxt
@@ -3496,14 +3496,14 @@ function OPT.setMinimized(collapsed)
         MainFrame.Size = UDim2.new(0, 165, 0, 30)
         if OPT.MinimizeBtn then
             OPT.MinimizeBtn.Text = "+"
-            OPT.MinimizeBtn.BackgroundColor3 = Color3.fromRGB(48, 56, 78)
+            OPT.MinimizeBtn.BackgroundColor3 = Color3.fromRGB(14, 50, 100)
         end
     else
-        MainFrame.Size = UDim2.new(0, 290, 0, 260)
+        MainFrame.Size = UDim2.new(0, 500, 0, 360)
         TabBar.Visible = true
         if OPT.MinimizeBtn then
             OPT.MinimizeBtn.Text = "—"
-            OPT.MinimizeBtn.BackgroundColor3 = Color3.fromRGB(36, 38, 48)
+            OPT.MinimizeBtn.BackgroundColor3 = Color3.fromRGB(14, 40, 85)
         end
         switchTab(OPT.currentTab or 1)
     end
@@ -3539,7 +3539,7 @@ local function updateAutoRejoinButtonVisuals()
     AutoRejoinBtn.Text = AUTO_REJOIN_MODES[autoRejoinIndex].name
     local mode = AUTO_REJOIN_MODES[autoRejoinIndex].mode
     if mode == "OFF" then
-        AutoRejoinBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+        AutoRejoinBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
         AutoRejoinBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
     elseif mode == "HOP" then
         AutoRejoinBtn.BackgroundColor3 = Color3.fromRGB(45, 40, 65)
@@ -3552,7 +3552,7 @@ local function updateSelectors()
     if raidTypeIndex == 1 then
         TypeSelector.Text = "Modo: ⚔️ Incursión normal"
         TypeSelector.TextColor3 = Color3.fromRGB(100, 210, 255)
-        TypeSelector.BackgroundColor3 = Color3.fromRGB(35, 42, 55)
+        TypeSelector.BackgroundColor3 = Color3.fromRGB(16, 40, 78)
     else
         TypeSelector.Text = "Modo: 🗼 Torre de ascensión"
         TypeSelector.TextColor3 = Color3.fromRGB(255, 175, 80)
@@ -3563,7 +3563,7 @@ local function updateSelectors()
     if curMap.isEvent then
         TierSelector.TextColor3 = Color3.fromRGB(180, 180, 180)
     else
-        TierSelector.TextColor3 = Color3.fromRGB(255, 215, 0)
+        TierSelector.TextColor3 = Color3.fromRGB(80, 210, 255)
     end
     updateTierButtonVisuals()
     updateAutoRejoinButtonVisuals()
@@ -3644,7 +3644,7 @@ AutoStartBtn.MouseButton1Click:Connect(function()
         AutoStartBtn.Text = "Inicio automático al entrar: ACTIVADO (SÍ)"
         AutoStartBtn.TextColor3 = Color3.fromRGB(120, 255, 150)
     else
-        AutoStartBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+        AutoStartBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
         AutoStartBtn.Text = "Inicio automático al entrar: DESACTIVADO (NO)"
         AutoStartBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
     end
@@ -3657,7 +3657,7 @@ local function updateHideDropsButtonVisuals()
         HideDropsBtn.Text = "Ocultar botín: ACTIVADO (SÍ - ocultar)"
         HideDropsBtn.TextColor3 = Color3.fromRGB(120, 255, 120)
     else
-        HideDropsBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+        HideDropsBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
         HideDropsBtn.Text = "Ocultar botín: DESACTIVADO (NO - mostrar)"
         HideDropsBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
     end
@@ -3679,7 +3679,7 @@ do
             OPT.HideDamageBtn.Text = "Ocultar daño: ACTIVADO (SÍ - ocultar)"
             OPT.HideDamageBtn.TextColor3 = Color3.fromRGB(120, 255, 120)
         else
-            OPT.HideDamageBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            OPT.HideDamageBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
             OPT.HideDamageBtn.Text = "Ocultar daño: DESACTIVADO (NO - mostrar)"
             OPT.HideDamageBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
         end
@@ -3751,7 +3751,7 @@ do
             OPT.HideSkillEffectsBtn.Text = "Ocultar efectos: ACTIVADO (SÍ - ocultar)"
             OPT.HideSkillEffectsBtn.TextColor3 = Color3.fromRGB(120, 255, 120)
         else
-            OPT.HideSkillEffectsBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            OPT.HideSkillEffectsBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
             OPT.HideSkillEffectsBtn.Text = "Ocultar efectos: DESACTIVADO (NO - mostrar)"
             OPT.HideSkillEffectsBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
         end
@@ -3936,7 +3936,7 @@ do
 
                 OPT.redeemingCodes = false
                 if OPT.CodesBtn then
-                    OPT.CodesBtn.BackgroundColor3 = Color3.fromRGB(70, 52, 110)
+                    OPT.CodesBtn.BackgroundColor3 = Color3.fromRGB(20, 50, 100)
                     OPT.CodesBtn.Text = "🎁 Canjear todos los códigos"
                 end
             end)
@@ -4061,7 +4061,7 @@ do
             DB.AutoBtn.Text = "♻️ Recolección automática: ACTIVADA"
             DB.AutoBtn.TextColor3 = Color3.fromRGB(120, 255, 160)
         else
-            DB.AutoBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            DB.AutoBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
             DB.AutoBtn.Text = "♻️ Recolección automática: DESACTIVADA (manual)"
             DB.AutoBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
         end
@@ -4464,7 +4464,7 @@ do
             BossAlert.Button.Text = "Alerta de jefe 1%: ACTIVADA (SÍ - sobre la cabeza)"
             BossAlert.Button.TextColor3 = Color3.fromRGB(120, 255, 150)
         else
-            BossAlert.Button.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            BossAlert.Button.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
             BossAlert.Button.Text = "Alerta de jefe 1%: DESACTIVADA (NO)"
             BossAlert.Button.TextColor3 = Color3.fromRGB(180, 180, 180)
             if BossAlert.billboard and BossAlert.billboard.Enabled then
@@ -4534,7 +4534,7 @@ do
         pctLbl.Position = UDim2.new(1, -74, 0, 3)
         pctLbl.BackgroundTransparency = 1
         pctLbl.Text = "0.00% / 1%"
-        pctLbl.TextColor3 = Color3.fromRGB(255, 215, 100)
+        pctLbl.TextColor3 = Color3.fromRGB(120, 210, 255)
         pctLbl.Font = Enum.Font.GothamBold
         pctLbl.TextSize = 10
         pctLbl.TextXAlignment = Enum.TextXAlignment.Right
@@ -4889,8 +4889,8 @@ end
 function updateQuirkButtonVisuals()
     if quirkTypeIndex == 1 then
         QuirkTypeBtn.Text = "🔮 Modo: 👤 Rasgo de héroe"
-        QuirkTypeBtn.BackgroundColor3 = Color3.fromRGB(45, 35, 60)
-        QuirkTypeBtn.TextColor3 = Color3.fromRGB(220, 170, 255)
+        QuirkTypeBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 75)
+        QuirkTypeBtn.TextColor3 = Color3.fromRGB(170, 215, 255)
     elseif quirkTypeIndex == 2 then
         QuirkTypeBtn.Text = "🔮 Modo: ⚔️ Rasgo de arma"
         QuirkTypeBtn.BackgroundColor3 = Color3.fromRGB(35, 50, 60)
@@ -6374,7 +6374,7 @@ if autoStartOnJoin then
     AutoStartBtn.Text = "Inicio automático al entrar: ACTIVADO (SÍ)"
     AutoStartBtn.TextColor3 = Color3.fromRGB(120, 255, 150)
 else
-    AutoStartBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    AutoStartBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
     AutoStartBtn.Text = "Inicio automático al entrar: DESACTIVADO (NO)"
     AutoStartBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end
@@ -6418,10 +6418,10 @@ end
 -- 🎨 REDISEÑO VISUAL (solo apariencia; la lógica y los estados no se tocan)
 -- ====================================================================
 do
-    local accent   = Color3.fromRGB(0, 195, 255)
-    local gold     = Color3.fromRGB(255, 185, 70)
-    local lineCol  = Color3.fromRGB(70, 78, 105)
-    local cardCol  = Color3.fromRGB(28, 31, 43)
+    local accent   = Color3.fromRGB(0, 140, 255)
+    local neon2     = Color3.fromRGB(0, 160, 255)
+    local lineCol  = Color3.fromRGB(38, 70, 120)
+    local cardCol  = Color3.fromRGB(12, 26, 52)
 
     local function corner(obj, radius)
         if obj:FindFirstChildOfClass("UICorner") then return end
@@ -6444,8 +6444,8 @@ do
             stroke(obj, lineCol, 1, 0.55)
             -- Los textos españoles más largos se ajustan para no cortarse
             if #obj.Text > 46 then obj.TextSize = 9 end
-            if not obj:GetAttribute("7ZStyled") then
-                obj:SetAttribute("7ZStyled", true)
+            if not obj:GetAttribute("ENKYStyled") then
+                obj:SetAttribute("ENKYStyled", true)
                 obj.MouseEnter:Connect(function() stroke(obj, accent, 1.5, 0.15) end)
                 obj.MouseLeave:Connect(function() stroke(obj, lineCol, 1, 0.55) end)
             end
@@ -6459,10 +6459,10 @@ do
     -- Ventana, cabecera y franja de acento
     MainFrame.BackgroundColor3 = Color3.fromRGB(18, 20, 28)
     corner(MainFrame, 10)
-    stroke(MainFrame, Color3.fromRGB(65, 75, 100), 1.5, 0.35)
-    Header.BackgroundColor3 = Color3.fromRGB(13, 15, 22)
+    stroke(MainFrame, Color3.fromRGB(30, 70, 140), 1.5, 0.35)
+    Header.BackgroundColor3 = Color3.fromRGB(8, 18, 38)
     corner(Header, 10)
-    stroke(Header, gold, 1, 0.55)
+    stroke(Header, neon2, 1, 0.55)
 
     local accentBar = Instance.new("Frame", Header)
     accentBar.Name = "AccentBar"
@@ -6481,12 +6481,175 @@ do
     -- Modales con borde dorado
     for _, modal in ipairs({TierModal, QuirkTargetModal}) do
         modal.BackgroundColor3 = Color3.fromRGB(20, 22, 32)
-        stroke(modal, gold, 1.5, 0.35)
+        stroke(modal, neon2, 1.5, 0.35)
         corner(modal, 12)
     end
 
     -- Aplicar estilo a lo que ya existe y a lo que se cree después
     for _, obj in ipairs(ScreenGui:GetDescendants()) do style(obj) end
     ScreenGui.DescendantAdded:Connect(style)
+end
+
+-- ====================================================================
+-- 💙 DISEÑO NUEVO: barra lateral + panel de contenido (neón azul)
+-- ====================================================================
+do
+    local neonBlue     = Color3.fromRGB(0, 150, 255)
+    local blueDark = Color3.fromRGB(0, 70, 140)
+    local bgDeep     = Color3.fromRGB(6, 14, 30)
+    local bgPanel    = Color3.fromRGB(10, 24, 50)
+    local txtSoft    = Color3.fromRGB(185, 215, 255)
+
+    local function addStroke(obj, color, th, trans)
+        local s = obj:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke", obj)
+        s.Color = color
+        s.Thickness = th or 1
+        s.Transparency = trans or 0.4
+        s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    end
+    local function addCorner(obj, r)
+        local c = obj:FindFirstChildOfClass("UICorner") or Instance.new("UICorner", obj)
+        c.CornerRadius = UDim.new(0, r or 8)
+    end
+
+    -- Ventana principal
+    MainFrame.Size = UDim2.new(0, 500, 0, 360)
+    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -180)
+    MainFrame.BackgroundColor3 = bgDeep
+    addCorner(MainFrame, 14)
+    addStroke(MainFrame, neonBlue, 2, 0.35)
+
+    -- Cabecera
+    Header.BackgroundColor3 = Color3.fromRGB(8, 18, 38)
+    addStroke(Header, blueDark, 1, 0.6)
+    Title.Text = "⚡ ENKY HUB  ·  ARISE"
+    Title.TextColor3 = Color3.fromRGB(225, 240, 255)
+    Title.TextSize = 14
+    Title.Size = UDim2.new(1, -80, 1, 0)
+    local accentBar = Header:FindFirstChild("AccentBar")
+    if accentBar then accentBar.BackgroundColor3 = neonBlue end
+
+    -- Barra lateral de navegación
+    TabBar.Position = UDim2.new(0, 6, 0, 38)
+    TabBar.Size = UDim2.new(0, 88, 1, -46)
+    TabBar.BackgroundColor3 = Color3.fromRGB(8, 18, 38)
+    TabBar.BackgroundTransparency = 0
+    TabBar.BorderSizePixel = 0
+    addCorner(TabBar, 12)
+    addStroke(TabBar, blueDark, 1, 0.5)
+
+    local sideLabel = Instance.new("TextLabel", TabBar)
+    sideLabel.Name = "SideLabel"
+    sideLabel.Size = UDim2.new(1, -12, 0, 20)
+    sideLabel.Position = UDim2.new(0, 6, 0, 6)
+    sideLabel.BackgroundTransparency = 1
+    sideLabel.Text = "MENÚ"
+    sideLabel.TextColor3 = neonBlue
+    sideLabel.Font = Enum.Font.GothamBold
+    sideLabel.TextSize = 10
+    sideLabel.TextXAlignment = Enum.TextXAlignment.Left
+    sideLabel.ZIndex = 2
+
+    local nav = {
+        {TabRaidBtn,    "⚔️  Incursión"},
+        {TabFarmBtn,    "🌍  Granja"},
+        {TabQuirkBtn,   "🔮  Tirada"},
+        {TabSettingBtn, "⚙️  Ajustes"},
+        {TabInfoBtn,    "ℹ️  Info"},
+    }
+    for i, item in ipairs(nav) do
+        local b = item[1]
+        b.Text = item[2]
+        b.Size = UDim2.new(1, -12, 0, 34)
+        b.Position = UDim2.new(0, 6, 0, 32 + (i - 1) * 40)
+        b.BackgroundColor3 = Color3.fromRGB(12, 26, 52)
+        b.TextColor3 = txtSoft
+        b.Font = Enum.Font.GothamBold
+        b.TextSize = 11
+        b.TextXAlignment = Enum.TextXAlignment.Left
+        b.ZIndex = 3
+        addCorner(b, 8)
+    end
+
+    -- Tarjeta de perfil (decorativa)
+    local profile = Instance.new("Frame", TabBar)
+    profile.Name = "ProfileCard"
+    profile.Size = UDim2.new(1, -12, 0, 60)
+    profile.Position = UDim2.new(0, 6, 1, -68)
+    profile.BackgroundColor3 = Color3.fromRGB(12, 28, 56)
+    profile.BorderSizePixel = 0
+    addCorner(profile, 10)
+    addStroke(profile, blueDark, 1, 0.5)
+    profile.ZIndex = 2
+
+    local avatar = Instance.new("TextLabel", profile)
+    avatar.Size = UDim2.new(0, 34, 0, 34)
+    avatar.Position = UDim2.new(0, 8, 0, 13)
+    avatar.BackgroundColor3 = neonBlue
+    avatar.Text = "⚡"
+    avatar.TextColor3 = Color3.fromRGB(5, 12, 25)
+    avatar.Font = Enum.Font.GothamBold
+    avatar.TextSize = 18
+    addCorner(avatar, 17)
+    avatar.ZIndex = 3
+
+    local profName = Instance.new("TextLabel", profile)
+    profName.Size = UDim2.new(1, -48, 0, 18)
+    profName.Position = UDim2.new(0, 46, 0, 16)
+    profName.BackgroundTransparency = 1
+    profName.Text = "ENKY HUB"
+    profName.TextColor3 = Color3.fromRGB(225, 240, 255)
+    profName.Font = Enum.Font.GothamBold
+    profName.TextSize = 11
+    profName.TextXAlignment = Enum.TextXAlignment.Left
+    profName.ZIndex = 3
+
+    local profSub = Instance.new("TextLabel", profile)
+    profSub.Size = UDim2.new(1, -48, 0, 14)
+    profSub.Position = UDim2.new(0, 46, 0, 34)
+    profSub.BackgroundTransparency = 1
+    profSub.Text = "ARISE · v3.1"
+    profSub.TextColor3 = txtSoft
+    profSub.Font = Enum.Font.Gotham
+    profSub.TextSize = 9
+    profSub.TextXAlignment = Enum.TextXAlignment.Left
+    profSub.ZIndex = 3
+
+    -- Título del panel de contenido
+    local contentTitle = Instance.new("TextLabel", MainFrame)
+    contentTitle.Name = "ContentTitle"
+    contentTitle.Size = UDim2.new(1, -106, 0, 24)
+    contentTitle.Position = UDim2.new(0, 100, 0, 40)
+    contentTitle.BackgroundTransparency = 1
+    contentTitle.Text = "✨ Panel de control"
+    contentTitle.TextColor3 = neonBlue
+    contentTitle.Font = Enum.Font.GothamBold
+    contentTitle.TextSize = 12
+    contentTitle.TextXAlignment = Enum.TextXAlignment.Left
+    contentTitle.ZIndex = 2
+
+    -- Páginas a la derecha de la barra lateral
+    for _, page in ipairs({PageRaid, PageFarm, PageQuirk, PageSettings, PageInfo}) do
+        page.Position = UDim2.new(0, 98, 0, 68)
+        page.Size = UDim2.new(1, -106, 1, -76)
+        page.BackgroundColor3 = bgPanel
+        page.BackgroundTransparency = 0.15
+        addCorner(page, 10)
+        addStroke(page, blueDark, 1, 0.6)
+    end
+
+    -- Modal de niveles dentro del panel
+    TierModal.Position = UDim2.new(0, 98, 0, 68)
+    TierModal.Size = UDim2.new(1, -106, 1, -76)
+    TierModal.BackgroundColor3 = bgPanel
+
+    -- Modal de rasgos, más grande y a juego
+    QuirkTargetModal.Size = UDim2.new(0, 330, 0, 290)
+    QuirkTargetModal.Position = UDim2.new(0.5, -165, 0.5, -145)
+    QuirkTargetModal.BackgroundColor3 = bgPanel
+    addStroke(QuirkTargetModal, neonBlue, 2, 0.4)
+
+    -- Reaplicar el estado de la pestaña activa con los colores nuevos
+    switchTab(OPT.currentTab or 1)
 end
 
