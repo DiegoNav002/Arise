@@ -209,7 +209,14 @@ local raidTypeIndex = 1       -- 1 = ⚔️ Normal Raid, 2 = 🗼 Ascension Towe
 local selectedNormalIndex = 10 -- เริ่มต้นที่ Normal Map 21: Cursed City
 local selectedAscIndex = 21   -- เริ่มต้นที่ Asc 21: Ashborn+1
 local farmFilterIndex = 1     -- All Mobs
-local ATTACK_INTERVAL = 0.20  -- ความเร็วรอบฟันที่เสถียรที่สุด สอดคล้องกับคูลดาวน์เซิร์ฟเวอร์
+local ATTACK_INTERVAL = 0.20
+
+-- Selecciones múltiples ENKY (vacias = comportamiento original de un solo valor)
+local ENKY_MultiMaps    = { normal = {}, tower = {} }
+local ENKY_MultiPresets = {}
+local ENKY_MultiSpeeds  = {}
+local ENKY_MultiFarm    = {}
+local ENKY_speedCursor  = 0  -- ความเร็วรอบฟันที่เสถียรที่สุด สอดคล้องกับคูลดาวน์เซิร์ฟเวอร์
 
 local FARM_FILTER_MODES = {
     { name = "Objetivo: Todos los monstruos" },
@@ -579,6 +586,21 @@ local function isTargetQuirk(qId, qCfg)
     local score = 1
     if qCfg then
         score = qCfg.Score or qCfg.Order or qCfg.Quality or 1
+    end
+    if #ENKY_MultiPresets > 0 then
+        for _, p in ipairs(ENKY_MultiPresets) do
+            if quirkTypeIndex == 3 then
+                if p == 1 and score >= 8 then return true end
+                if p == 2 and score >= 6 then return true end
+                if p == 3 and score >= 10 then return true end
+                if p == 4 and quirkCustomTargets[qId] == true then return true end
+            else
+                if p == 1 and score >= 5 then return true end
+                if p == 2 and score >= 4 then return true end
+                if p == 3 and quirkCustomTargets[qId] == true then return true end
+            end
+        end
+        return false
     end
     if quirkTypeIndex == 3 then
         -- โหมดสุ่ม Grade อุปกรณ์ (Score 1..10: E=1, D=2, C=3, B=4, A=5, S=6, SS=7, G=8, N=9, M=10)
@@ -3580,6 +3602,15 @@ MapSelector.MouseButton1Click:Connect(function()
     local list = getCurrentRaidList()
     local idx = getCurrentSelectedMapIndex() + 1
     if idx > #list then idx = 1 end
+    local chosen = (raidTypeIndex == 1) and ENKY_MultiMaps.normal or ENKY_MultiMaps.tower
+    if #chosen > 0 then
+        local cur = getCurrentSelectedMapIndex()
+        local nextIdx = chosen[1]
+        for _, m in ipairs(chosen) do
+            if m > cur then nextIdx = m; break end
+        end
+        idx = nextIdx
+    end
     setCurrentSelectedMapIndex(idx)
     TierModal.Visible = false
     updateSelectors()
@@ -5259,6 +5290,11 @@ local function autoQuirkLoop()
         end
 
         local delaySec = QUIRK_SPEED_MODES[quirkSpeedIndex] and QUIRK_SPEED_MODES[quirkSpeedIndex].delay or 0.15
+        if #ENKY_MultiSpeeds > 0 then
+            ENKY_speedCursor = (ENKY_speedCursor % #ENKY_MultiSpeeds) + 1
+            local s = ENKY_MultiSpeeds[ENKY_speedCursor]
+            delaySec = (QUIRK_SPEED_MODES[s] and QUIRK_SPEED_MODES[s].delay) or delaySec
+        end
         task.wait(delaySec)
     end
 
@@ -5402,12 +5438,18 @@ local function autoFarmMapLoop()
             if not isDummy then
                 local isBoss = (enemy.level == 99 or enemy.name:lower():find("boss") ~= nil)
                 local match = false
-                if farmFilterIndex == 1 then
-                    match = true
-                elseif farmFilterIndex == 2 and isBoss then
-                    match = true
-                elseif farmFilterIndex == 3 and not isBoss then
-                    match = true
+                local filters = (#ENKY_MultiFarm > 0) and ENKY_MultiFarm or { farmFilterIndex }
+                for _, f in ipairs(filters) do
+                    if f == 1 then
+                        match = true
+                        break
+                    elseif f == 2 and isBoss then
+                        match = true
+                        break
+                    elseif f == 3 and not isBoss then
+                        match = true
+                        break
+                    end
                 end
 
                 if match then
@@ -6525,7 +6567,7 @@ do
     Title.Text = "⚡ ENKY HUB  ·  ARISE"
     Title.TextColor3 = Color3.fromRGB(225, 240, 255)
     Title.TextSize = 14
-    Title.Size = UDim2.new(1, -80, 1, 0)
+    Title.Size = UDim2.new(1, -108, 1, 0)
     local accentBar = Header:FindFirstChild("AccentBar")
     if accentBar then accentBar.BackgroundColor3 = neonBlue end
 
@@ -6651,5 +6693,128 @@ do
 
     -- Reaplicar el estado de la pestaña activa con los colores nuevos
     switchTab(OPT.currentTab or 1)
+end
+
+-- ====================================================================
+-- ⚙️ ENKY: panel de selección múltiple (mapas, niveles, rasgos, farmeo)
+-- ====================================================================
+do
+    local ENKY_PanelBtn = Instance.new("TextButton", Header)
+    ENKY_PanelBtn.Size = UDim2.new(0, 24, 0, 22)
+    ENKY_PanelBtn.Position = UDim2.new(1, -78, 0, 4)
+    ENKY_PanelBtn.BackgroundColor3 = Color3.fromRGB(14, 40, 85)
+    ENKY_PanelBtn.Text = "⊞"
+    ENKY_PanelBtn.TextColor3 = Color3.fromRGB(120, 210, 255)
+    ENKY_PanelBtn.Font = Enum.Font.GothamBold
+    ENKY_PanelBtn.TextSize = 14
+    Instance.new("UICorner", ENKY_PanelBtn).CornerRadius = UDim.new(0, 5)
+
+    local ENKY_Panel = Instance.new("Frame", MainFrame)
+    ENKY_Panel.Size = UDim2.new(1, -16, 1, -46)
+    ENKY_Panel.Position = UDim2.new(0, 8, 0, 42)
+    ENKY_Panel.BackgroundColor3 = Color3.fromRGB(8, 18, 38)
+    ENKY_Panel.BorderSizePixel = 0
+    ENKY_Panel.ZIndex = 50
+    ENKY_Panel.Visible = false
+    Instance.new("UICorner", ENKY_Panel).CornerRadius = UDim.new(0, 10)
+    local pStroke = Instance.new("UIStroke", ENKY_Panel)
+    pStroke.Color = Color3.fromRGB(0, 150, 255)
+    pStroke.Thickness = 1.5
+    pStroke.Transparency = 0.4
+
+    local ENKY_Scroll = Instance.new("ScrollingFrame", ENKY_Panel)
+    ENKY_Scroll.Size = UDim2.new(1, -8, 1, -8)
+    ENKY_Scroll.Position = UDim2.new(0, 4, 0, 4)
+    ENKY_Scroll.BackgroundTransparency = 1
+    ENKY_Scroll.BorderSizePixel = 0
+    ENKY_Scroll.ScrollBarThickness = 5
+    ENKY_Scroll.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
+    ENKY_Scroll.ZIndex = 51
+    Instance.new("UICorner", ENKY_Scroll).CornerRadius = UDim.new(0, 8)
+
+    local y = 4
+    local function section(text)
+        local l = Instance.new("TextLabel", ENKY_Scroll)
+        l.Size = UDim2.new(1, -8, 0, 18)
+        l.Position = UDim2.new(0, 4, 0, y)
+        l.BackgroundTransparency = 1
+        l.Text = text
+        l.TextColor3 = Color3.fromRGB(0, 190, 255)
+        l.Font = Enum.Font.GothamBold
+        l.TextSize = 10
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.ZIndex = 51
+        y = y + 20
+    end
+    local function toggle(label, get, set)
+        local b = Instance.new("TextButton", ENKY_Scroll)
+        b.Size = UDim2.new(1, -8, 0, 18)
+        b.Position = UDim2.new(0, 4, 0, y)
+        b.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
+        b.TextColor3 = Color3.fromRGB(195, 220, 255)
+        b.Font = Enum.Font.Gotham
+        b.TextSize = 9
+        b.TextXAlignment = Enum.TextXAlignment.Left
+        b.ZIndex = 51
+        local function refresh()
+            b.Text = (get() and "✓ " or "   ") .. label
+            b.BackgroundColor3 = get() and Color3.fromRGB(16, 75, 125) or Color3.fromRGB(16, 32, 62)
+        end
+        b.MouseButton1Click:Connect(function()
+            set(not get())
+            refresh()
+        end)
+        refresh()
+        y = y + 20
+    end
+
+    section("🗺️ MAPAS NORMALES (se alternan)")
+    for i, m in ipairs(NORMAL_RAID_LIST) do
+        toggle(m.name,
+            function() return ENKY_MultiMaps.normal[i] == true end,
+            function(v) ENKY_MultiMaps.normal[i] = v or nil end)
+    end
+    section("🗼 TORRES DE ASCENSIÓN (se alternan)")
+    for i, m in ipairs(ASCENSION_RAID_LIST) do
+        toggle(m.name,
+            function() return ENKY_MultiMaps.tower[i] == true end,
+            function(v) ENKY_MultiMaps.tower[i] = v or nil end)
+    end
+    section("🎯 NIVELES DE INCURSIÓN")
+    for i, d in ipairs(NORMAL_TIER_DEFINITIONS) do
+        toggle(d.name,
+            function() return selectedNormalTiers[i] == true end,
+            function(v) selectedNormalTiers[i] = v end)
+    end
+    section("🎯 NIVELES DE TORRE")
+    for i, d in ipairs(ASCENSION_TIER_DEFINITIONS) do
+        toggle(d.name,
+            function() return selectedAscTiers[i] == true end,
+            function(v) selectedAscTiers[i] = v end)
+    end
+    section("🔮 OBJETIVOS DE TIRADA (se combinan)")
+    for i = 1, 4 do
+        local names = { "Mítico+ / Q5+", "Legendario+ / Q4+", "Personalizados", "Más alto" }
+        toggle(names[i],
+            function() return ENKY_MultiPresets[i] == true end,
+            function(v) ENKY_MultiPresets[i] = v or nil end)
+    end
+    section("⚡ VELOCIDADES (se alternan)")
+    for i, m in ipairs(QUIRK_SPEED_MODES) do
+        toggle(m.name,
+            function() return ENKY_MultiSpeeds[i] == true end,
+            function(v) ENKY_MultiSpeeds[i] = v or nil end)
+    end
+    section("🌍 FILTROS DE FARMEO (se combinan)")
+    for i, m in ipairs(FARM_FILTER_MODES) do
+        toggle(m.name,
+            function() return ENKY_MultiFarm[i] == true end,
+            function(v) ENKY_MultiFarm[i] = v or nil end)
+    end
+
+    ENKY_Scroll.CanvasSize = UDim2.new(0, 0, 0, y + 8)
+    ENKY_PanelBtn.MouseButton1Click:Connect(function()
+        ENKY_Panel.Visible = not ENKY_Panel.Visible
+    end)
 end
 
