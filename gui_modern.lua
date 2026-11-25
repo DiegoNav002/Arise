@@ -6902,7 +6902,7 @@ pcall(function()
     end
     for i = 1, 5 do
         tabs[i].MouseButton1Click:Connect(function()
-            for j = 1, 3 do
+            for j = 1, 5 do
                 pages[j].Visible = (j == i)
                 tabs[j].BackgroundColor3 = (j == i) and neon or Color3.fromRGB(20, 40, 80)
             end
