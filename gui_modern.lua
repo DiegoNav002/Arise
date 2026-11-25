@@ -6842,7 +6842,7 @@ pcall(function()
 end)
 
 -- ====================================================================
--- 🪟 ENKY UI: estructura tipo preview (tarjetas + switches + pestañas)
+-- 🪟 ENKY UI: estructura tipo preview (sidebar + tarjetas + desplegables)
 -- ====================================================================
 pcall(function()
     local neon  = Color3.fromRGB(0, 150, 255)
@@ -6856,10 +6856,11 @@ pcall(function()
     end
     local oldPanel = MainFrame:FindFirstChild("ENKY_Panel")
     if oldPanel then oldPanel.Visible = false end
+    for _, p in ipairs({ PageRaid, PageFarm, PageQuirk, PageSettings, PageInfo }) do p.Visible = false end
 
     local panel = mk(MainFrame, "Frame", {
-        Name = "ENKY_Modern", Size = UDim2.new(1, -16, 1, -46),
-        Position = UDim2.new(0, 8, 0, 42), BackgroundColor3 = dark,
+        Name = "ENKY_Modern", Size = UDim2.new(1, -106, 1, -46),
+        Position = UDim2.new(0, 98, 0, 42), BackgroundColor3 = dark,
         BorderSizePixel = 0, ZIndex = 60, Visible = true
     })
     mk(panel, "UICorner", { CornerRadius = UDim.new(0, 10) })
@@ -6909,52 +6910,55 @@ pcall(function()
         end)
     end
 
+    local switches = { {}, {}, {}, {}, {} }
     local function card(page, y, title, meta)
         local c = mk(page, "Frame", {
-            Size = UDim2.new(1, -4, 0, 62), Position = UDim2.new(0, 2, 0, y),
+            Size = UDim2.new(1, -4, 0, 72), Position = UDim2.new(0, 2, 0, y),
             BackgroundColor3 = cardC, BorderSizePixel = 0, ZIndex = 62
         })
         mk(c, "UICorner", { CornerRadius = UDim.new(0, 8) })
         mk(c, "UIStroke", { Color = Color3.fromRGB(0, 120, 200), Thickness = 1, Transparency = 0.6 })
         mk(c, "TextLabel", {
-            Size = UDim2.new(1, -46, 0, 20), Position = UDim2.new(0, 8, 0, 6),
+            Size = UDim2.new(1, -46, 0, 18), Position = UDim2.new(0, 8, 0, 4),
             BackgroundTransparency = 1, Text = title, TextColor3 = Color3.new(1, 1, 1),
             Font = Enum.Font.GothamBold, TextSize = 10, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 63
         })
         mk(c, "TextLabel", {
-            Size = UDim2.new(1, -46, 0, 14), Position = UDim2.new(0, 8, 0, 26),
+            Size = UDim2.new(1, -46, 0, 12), Position = UDim2.new(0, 8, 0, 22),
             BackgroundTransparency = 1, Text = meta, TextColor3 = soft,
             Font = Enum.Font.Gotham, TextSize = 8, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 63
         })
         local bar = mk(c, "Frame", {
-            Size = UDim2.new(1, -16, 0, 3), Position = UDim2.new(0, 8, 0, 43),
+            Size = UDim2.new(1, -16, 0, 3), Position = UDim2.new(0, 8, 0, 52),
             BackgroundColor3 = Color3.fromRGB(6, 16, 34), ZIndex = 63
         })
-        local fill = mk(bar, "Frame", {
-            Size = UDim2.new(0, 0, 1, 0), BackgroundColor3 = neon, ZIndex = 64
-        })
+        local fill = mk(bar, "Frame", { Size = UDim2.new(0, 0, 1, 0), BackgroundColor3 = neon, ZIndex = 64 })
         local st = mk(c, "TextLabel", {
-            Size = UDim2.new(1, -46, 0, 14), Position = UDim2.new(0, 8, 0, 48),
+            Size = UDim2.new(1, -46, 0, 12), Position = UDim2.new(0, 8, 0, 57),
             BackgroundTransparency = 1, Text = "Estado: Inactivo", TextColor3 = soft,
             Font = Enum.Font.Gotham, TextSize = 8, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 63
         })
         return c, st, fill
     end
 
-    local function sw(cardObj, isOn, onChange)
+    local function sw(cardObj, pageIdx, isOn, onChange)
         local b = mk(cardObj, "TextButton", {
-            Size = UDim2.new(0, 34, 0, 18), Position = UDim2.new(1, -40, 0, 8),
+            Size = UDim2.new(0, 34, 0, 18), Position = UDim2.new(1, -40, 0, 6),
             BackgroundColor3 = isOn() and neon or Color3.fromRGB(50, 60, 80),
             Text = isOn() and "ON" or "OFF", TextColor3 = Color3.new(1, 1, 1),
             Font = Enum.Font.GothamBold, TextSize = 8, ZIndex = 64
         })
         mk(b, "UICorner", { CornerRadius = UDim.new(0, 9) })
+        local function setVis(v)
+            b.BackgroundColor3 = v and neon or Color3.fromRGB(50, 60, 80)
+            b.Text = v and "ON" or "OFF"
+        end
         b.MouseButton1Click:Connect(function()
             local v = not isOn()
             onChange(v)
-            b.BackgroundColor3 = v and neon or Color3.fromRGB(50, 60, 80)
-            b.Text = v and "ON" or "OFF"
+            setVis(v)
         end)
+        table.insert(switches[pageIdx], { isOn = isOn, onChange = onChange, setVis = setVis })
     end
 
     local function anim(st, fill, active, verb)
@@ -6971,98 +6975,183 @@ pcall(function()
         end)
     end
 
-    -- Pestaña Incursión
-    local c1, s1, f1 = card(pages[1], 4, "⚔️ Incursión normal", "Mapa: " .. (getCurrentMapConfig().name or "") .. " · Nivel: " .. getSelectedTiersText())
-    sw(c1, function() return isRaidRunning end, function(v)
+    local function allButtons(page, y)
+        local on = mk(page, "TextButton", {
+            Size = UDim2.new(0, 66, 0, 16), Position = UDim2.new(1, -144, 0, y),
+            BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "Activar todo",
+            TextColor3 = soft, Font = Enum.Font.GothamBold, TextSize = 7, ZIndex = 64
+        })
+        local off = mk(page, "TextButton", {
+            Size = UDim2.new(0, 70, 0, 16), Position = UDim2.new(1, -74, 0, y),
+            BackgroundColor3 = Color3.fromRGB(90, 35, 35), Text = "Detener todo",
+            TextColor3 = Color3.fromRGB(255, 170, 170), Font = Enum.Font.GothamBold, TextSize = 7, ZIndex = 64
+        })
+        return on, off
+    end
+
+    local function dropdown(parent, x, y, w, options, isChecked, setChecked, unit)
+        local btn = mk(parent, "TextButton", {
+            Size = UDim2.new(0, w, 0, 16), Position = UDim2.new(0, x, 0, y),
+            BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "▾",
+            TextColor3 = soft, Font = Enum.Font.GothamBold, TextSize = 7, ZIndex = 65
+        })
+        local pop = mk(parent, "Frame", {
+            Size = UDim2.new(0, 190, 0, math.min(#options * 16 + 6, 128)),
+            Position = UDim2.new(0, x, 0, y + 17), BackgroundColor3 = Color3.fromRGB(10, 24, 50),
+            BorderSizePixel = 1, BorderColor3 = neon, ZIndex = 70, Visible = false
+        })
+        local ps = mk(pop, "ScrollingFrame", {
+            Size = UDim2.new(1, -4, 1, -4), Position = UDim2.new(0, 2, 0, 2),
+            BackgroundTransparency = 1, BorderSizePixel = 0, ScrollBarThickness = 3,
+            ScrollBarImageColor3 = neon, ZIndex = 71
+        })
+        local function refresh()
+            local n = 0
+            local first = nil
+            for i = 1, #options do
+                if isChecked(i) then n = n + 1; if not first then first = options[i] end end
+            end
+            if n == 0 then btn.Text = "Ninguno ▾"
+            elseif n == 1 then btn.Text = first .. " ▾"
+            else btn.Text = n .. " " .. (unit or "opciones") .. " ▾" end
+        end
+        for i, label in ipairs(options) do
+            local ob = mk(ps, "TextButton", {
+                Size = UDim2.new(1, -4, 0, 14), Position = UDim2.new(0, 2, 0, (i - 1) * 16),
+                BackgroundColor3 = Color3.fromRGB(16, 32, 62),
+                Text = (isChecked(i) and "✓ " or "   ") .. label,
+                TextColor3 = soft, Font = Enum.Font.Gotham, TextSize = 7,
+                TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 72
+            })
+            ob.MouseButton1Click:Connect(function()
+                setChecked(i, not isChecked(i))
+                ob.Text = (isChecked(i) and "✓ " or "   ") .. label
+                refresh()
+            end)
+        end
+        ps.CanvasSize = UDim2.new(0, 0, 0, #options * 16 + 4)
+        btn.MouseButton1Click:Connect(function() pop.Visible = not pop.Visible end)
+        refresh()
+        return btn
+    end
+
+    local function names(list)
+        local out = {}
+        for i, v in ipairs(list) do out[i] = v.name end
+        return out
+    end
+    local mapNames     = names(NORMAL_RAID_LIST)
+    local towerNames   = names(ASCENSION_RAID_LIST)
+    local tierNames    = names(NORMAL_TIER_DEFINITIONS)
+    local towerTiers   = names(ASCENSION_TIER_DEFINITIONS)
+    local speedNames   = names(QUIRK_SPEED_MODES)
+    local presetNames  = { "Solo mítico (Q5+)", "Legendario+ (Q4+)", "Personalizados" }
+    local gradeNames   = { "Primordial+ (G+)", "Mythic+ (S+)", "M Only (M)", "Personalizados" }
+
+    -- Incursión
+    local onI, offI = allButtons(pages[1], 4)
+    local c1, s1, f1 = card(pages[1], 24, "⚔️ Incursión normal", "Selecciona mapas y niveles")
+    dropdown(c1, 8, 36, 120, mapNames,
+        function(i) return ENKY_MultiMaps.normal[i] == true end,
+        function(i, v) ENKY_MultiMaps.normal[i] = v or nil end, "mapas")
+    dropdown(c1, 132, 36, 108, tierNames,
+        function(i) return selectedNormalTiers[i] == true end,
+        function(i, v) selectedNormalTiers[i] = v end, "niveles")
+    sw(c1, 1, function() return isRaidRunning end, function(v)
         isRaidRunning = v
         if v then
             if isFarmRunning then isFarmRunning = false; FarmStatusLabel.Text = "Estado: Inactivo" end
             task.spawn(autoRaidLoop)
-        else
-            removeSafePlatform()
-        end
+        else removeSafePlatform() end
         saveBotState(v)
         if v then anim(s1, f1, function() return isRaidRunning end, "Buscando incursión") end
     end)
-    local c2, s2, f2 = card(pages[1], 72, "🗼 Torre de ascensión", "Niveles: " .. getSelectedTiersText())
-    sw(c2, function() return isRaidRunning and raidTypeIndex == 2 end, function(v)
+
+    local c2, s2, f2 = card(pages[1], 102, "🗼 Torre de ascensión", "Selecciona torres y niveles")
+    dropdown(c2, 8, 36, 120, towerNames,
+        function(i) return ENKY_MultiMaps.tower[i] == true end,
+        function(i, v) ENKY_MultiMaps.tower[i] = v or nil end, "torres")
+    dropdown(c2, 132, 36, 108, towerTiers,
+        function(i) return selectedAscTiers[i] == true end,
+        function(i, v) selectedAscTiers[i] = v end, "niveles")
+    sw(c2, 1, function() return isRaidRunning and raidTypeIndex == 2 end, function(v)
         raidTypeIndex = 2
         isRaidRunning = v
         updateSelectors()
         if v then task.spawn(autoRaidLoop) else removeSafePlatform() end
         if v then anim(s2, f2, function() return isRaidRunning end, "Buscando torre") end
     end)
-    local c3, s3, f3 = card(pages[1], 140, "🔁 Salto de servidor", "Si no aparece la puerta deseada")
-    sw(c3, function() return autoRejoinIndex == 2 end, function(v)
+
+    local c3, s3, f3 = card(pages[1], 180, "🔁 Salto de servidor", "Si no aparece la puerta deseada")
+    sw(c3, 1, function() return autoRejoinIndex == 2 end, function(v)
         autoRejoinIndex = v and 2 or 1
         updateAutoRejoinButtonVisuals()
         if v then anim(s3, f3, function() return autoRejoinIndex == 2 end, "Buscando servidor") end
     end)
-    local m1 = mk(c1, "TextButton", {
-        Size = UDim2.new(0, 70, 0, 16), Position = UDim2.new(1, -76, 0, 44),
-        BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "🗺️ Mapas ▾",
-        TextColor3 = soft, Font = Enum.Font.GothamBold, TextSize = 7, ZIndex = 64
-    })
-    m1.MouseButton1Click:Connect(function()
-        local old = MainFrame:FindFirstChild("ENKY_Panel")
-        if old then old.Visible = true end
-    end)
+    onI.MouseButton1Click:Connect(function() for _, x in ipairs(switches[1]) do if not x.isOn() then x.onChange(true); x.setVis(true) end end end)
+    offI.MouseButton1Click:Connect(function() for _, x in ipairs(switches[1]) do if x.isOn() then x.onChange(false); x.setVis(false) end end end)
 
-    -- Pestaña Granja
+    -- Granja
+    local onF, offF = allButtons(pages[2], 4)
     local farmCards = {
         { "🌍 Todos los monstruos", "Objetivo: todos" },
         { "👑 Solo jefes", "Objetivo: solo jefes" },
         { "👤 Solo normales", "Objetivo: monstruos normales" }
     }
     for i, d in ipairs(farmCards) do
-        local c, st, fl = card(pages[2], 4 + (i - 1) * 68, d[1], d[2])
-        sw(c, function() return isFarmRunning and farmFilterIndex == i end, function(v)
+        local c, st, fl = card(pages[2], 24 + (i - 1) * 80, d[1], d[2])
+        dropdown(c, 8, 36, 180, names(FARM_FILTER_MODES),
+            function(k) return ENKY_MultiFarm[k] == true end,
+            function(k, v) ENKY_MultiFarm[k] = v or nil end, "filtros")
+        sw(c, 2, function() return isFarmRunning and farmFilterIndex == i end, function(v)
             farmFilterIndex = i
             isFarmRunning = v
             if v then
                 if isRaidRunning then isRaidRunning = false; RaidStatusLabel.Text = "Estado: Inactivo" end
                 task.spawn(autoFarmMapLoop)
-            else
-                removeSafePlatform()
-            end
+            else removeSafePlatform() end
             if v then anim(st, fl, function() return isFarmRunning end, "Farmeando") end
         end)
     end
-    local cR, sR, fR = card(pages[2], 208, "🐉 Radar de Dragon Ball", "7 esferas gratis · escaneo automático")
-    sw(cR, function() return OPT.db and OPT.db.autoLoop == true end, function(v)
+    local cR, sR, fR = card(pages[2], 264, "🐉 Radar de Dragon Ball", "7 esferas gratis")
+    sw(cR, 2, function() return OPT.db and OPT.db.autoLoop == true end, function(v)
         if OPT.db then
             if v then OPT.db.startLoop() else OPT.db.autoLoop = false end
             if v then anim(sR, fR, function() return OPT.db.autoLoop == true end, "Escaneando esferas") end
         end
     end)
+    onF.MouseButton1Click:Connect(function() for _, x in ipairs(switches[2]) do if not x.isOn() then x.onChange(true); x.setVis(true) end end end)
+    offF.MouseButton1Click:Connect(function() for _, x in ipairs(switches[2]) do if x.isOn() then x.onChange(false); x.setVis(false) end end end)
 
-    -- Pestaña Tirada
+    -- Tirada
+    local onT, offT = allButtons(pages[3], 4)
     local rollCards = {
-        { "👤 Rasgo de héroe", "Ranura 1 (Núcleo rojo) · Q5+" },
-        { "⚔️ Rasgo de arma", "Ranura 1 (Piedra de arma 1) · Q5+" },
-        { "🛡️ Grado de equipo", "Ranura 1 (Piedra G 1) · G+" }
+        { "👤 Rasgo de héroe", "Ranura 1 (Núcleo rojo)", 1 },
+        { "⚔️ Rasgo de arma", "Ranura 1 (Piedra de arma 1)", 2 },
+        { "🛡️ Grado de equipo", "Ranura 1 (Piedra G 1)", 3 }
     }
-    for i, d in ipairs(rollCards) do
-        local c, st, fl = card(pages[3], 4 + (i - 1) * 68, d[1], d[2])
-        sw(c, function() return isQuirkRunning and quirkTypeIndex == i end, function(v)
-            quirkTypeIndex = i
+    for _, d in ipairs(rollCards) do
+        local c, st, fl = card(pages[3], 24 + (d[3] - 1) * 80, d[1], d[2])
+        local presets = (d[3] == 3) and gradeNames or presetNames
+        dropdown(c, 8, 36, 140, presets,
+            function(i) return ENKY_MultiPresets[i] == true end,
+            function(i, v) ENKY_MultiPresets[i] = v or nil end, "objetivos")
+        dropdown(c, 152, 36, 88, speedNames,
+            function(i) return ENKY_MultiSpeeds[i] == true end,
+            function(i, v) ENKY_MultiSpeeds[i] = v or nil end, "velocidades")
+        sw(c, 3, function() return isQuirkRunning and quirkTypeIndex == d[3] end, function(v)
+            quirkTypeIndex = d[3]
             isQuirkRunning = v
             updateQuirkButtonVisuals()
             if v then task.spawn(autoQuirkLoop) end
             if v then anim(st, fl, function() return isQuirkRunning end, "Tirando") end
         end)
-        local pb = mk(c, "TextButton", {
-            Size = UDim2.new(0, 70, 0, 16), Position = UDim2.new(1, -76, 0, 44),
-            BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "🎯 Opciones ▾",
-            TextColor3 = soft, Font = Enum.Font.GothamBold, TextSize = 7, ZIndex = 64
-        })
-        pb.MouseButton1Click:Connect(function()
-            local old = MainFrame:FindFirstChild("ENKY_Panel")
-            if old then old.Visible = true end
-        end)
     end
+    onT.MouseButton1Click:Connect(function() for _, x in ipairs(switches[3]) do if not x.isOn() then x.onChange(true); x.setVis(true) end end end)
+    offT.MouseButton1Click:Connect(function() for _, x in ipairs(switches[3]) do if x.isOn() then x.onChange(false); x.setVis(false) end end end)
 
-    -- Pestaña Ajustes
+    -- Ajustes
+    local onS, offS = allButtons(pages[4], 4)
     local settings = {
         { "Anti-AFK", function() return antiAfkEnabled end, function(v) antiAfkEnabled = v end },
         { "Prioridad de jefe (Lv.99)", function() return bossPriorityEnabled end, function(v) bossPriorityEnabled = v end },
@@ -7074,11 +7163,13 @@ pcall(function()
         { "Reunión automática", function() return autoRejoinIndex == 2 end, function(v) autoRejoinIndex = v and 2 or 1; updateAutoRejoinButtonVisuals() end }
     }
     for i, d in ipairs(settings) do
-        local c = card(pages[4], 4 + (i - 1) * 48, d[1], "Toca el switch para activarlo")
-        sw(c, d[2], d[3])
+        local c = card(pages[4], 24 + (i - 1) * 50, d[1], "Switch de ajuste")
+        sw(c, 4, d[2], d[3])
     end
+    onS.MouseButton1Click:Connect(function() for _, x in ipairs(switches[4]) do if not x.isOn() then x.onChange(true); x.setVis(true) end end end)
+    offS.MouseButton1Click:Connect(function() for _, x in ipairs(switches[4]) do if x.isOn() then x.onChange(false); x.setVis(false) end end end)
 
-    -- Pestaña Info
+    -- Info
     local infoLines = {
         "⚡ ENKY HUB · ARISE",
         "Modo: " .. ((raidTypeIndex == 1) and "Incursión normal" or "Torre de ascensión"),
@@ -7099,5 +7190,5 @@ pcall(function()
         })
     end
 
-    scroll.CanvasSize = UDim2.new(0, 0, 0, 560)
+    scroll.CanvasSize = UDim2.new(0, 0, 0, 900)
 end)
