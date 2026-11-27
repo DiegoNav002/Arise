@@ -1,5 +1,5 @@
 -- ====================================================================
--- ⚡ ENKY HUB v3.1
+-- [+] ENKY HUB v3.1
 -- ====================================================================
 
 -- Non-blocking game load check (safe on Delta & mobile)
@@ -248,7 +248,7 @@ local autoRejoinIndex = 1
 local autoStartOnJoin = false -- รอให้ผู้ใช้กด Start หรือโหลดสถานะเดิม
 
 -- สถานะการทำงาน
-local raidTypeIndex = 1       -- 1 = ⚔️ Normal Raid, 2 = 🗼 Ascension Tower, 3 = 💎 Asc + Rune Queue
+local raidTypeIndex = 1       -- 1 = [R] Normal Raid, 2 = [T] Ascension Tower, 3 = [Q] Asc + Rune Queue
 local selectedNormalIndex = 10 -- เริ่มต้นที่ Normal Map 21: Cursed City
 local selectedAscIndex = 21   -- เริ่มต้นที่ Asc 21: Ashborn+1
 local farmFilterIndex = 1     -- All Mobs
@@ -371,26 +371,26 @@ local EQUIP_GRADE_SLOTS = {
 }
 
 local QUIRK_SPEED_MODES = {
-    { name = "⚡ Velocidad: RÁPIDA (0.15s)", delay = 0.15 },
-    { name = "⏱️ Velocidad: NORMAL (0.40s)", delay = 0.40 },
-    { name = "🚀 Velocidad: TURBO (0.08s)", delay = 0.08 },
+    { name = "[+] Velocidad: RÁPIDA (0.15s)", delay = 0.15 },
+    { name = "⏱ Velocidad: NORMAL (0.40s)", delay = 0.40 },
+    { name = "[>] Velocidad: TURBO (0.08s)", delay = 0.08 },
 }
 
 local QUIRK_PRESET_MODES = {
-    { name = "🎯 Objetivo: 🌟 Solo mítico (Q5+)", minScore = 5 },
-    { name = "🎯 Objetivo: ✨ Legendario + mítico (Q4+)", minScore = 4 },
-    { name = "🎯 Objetivo: 📝 Rasgos personalizados", minScore = 0 },
+    { name = "[*] Objetivo: [*] Solo mítico (Q5+)", minScore = 5 },
+    { name = "[*] Objetivo: [*] Legendario + mítico (Q4+)", minScore = 4 },
+    { name = "[*] Objetivo: [P] Rasgos personalizados", minScore = 0 },
 }
 
 local GRADE_PRESET_MODES = {
-    { name = "🎯 Objetivo: 👑 Primordial+ (G+)", minScore = 8 },
-    { name = "🎯 Objetivo: 🌟 Mítico+ (S+)", minScore = 6 },
-    { name = "🎯 Objetivo: ⚡ Trascendente (M)", minScore = 10 },
-    { name = "🎯 Objetivo: 📝 Grados personalizados", minScore = 0 },
+    { name = "[*] Objetivo: [B] Primordial+ (G+)", minScore = 8 },
+    { name = "[*] Objetivo: [*] Mítico+ (S+)", minScore = 6 },
+    { name = "[*] Objetivo: [+] Trascendente (M)", minScore = 10 },
+    { name = "[*] Objetivo: [P] Grados personalizados", minScore = 0 },
 }
 
 local isQuirkRunning = false
-local quirkTypeIndex = 1   -- 1 = 👤 Hero Quirk, 2 = ⚔️ Weapon Quirk, 3 = 🛡️ Equip Grade
+local quirkTypeIndex = 1   -- 1 = [H] Hero Quirk, 2 = [R] Weapon Quirk, 3 = [A] Equip Grade
 local quirkSlotIndex = 1   -- 1 = Slot 1, 2 = Slot 2, 3 = Slot 3
 local quirkSpeedIndex = 1  -- 1 = Fast (0.15s)
 local quirkPresetIndex = 1 -- 1 = Mythic Only / Primordial+
@@ -2729,7 +2729,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -44, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "⚡ ENKY HUB"
+Title.Text = "[+] ENKY HUB"
 Title.TextColor3 = Color3.fromRGB(0, 150, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 13
@@ -2761,7 +2761,7 @@ local TabRaidBtn = Instance.new("TextButton")
 TabRaidBtn.Size = UDim2.new(0.188, 0, 1, 0)
 TabRaidBtn.Position = UDim2.new(0, 0, 0, 0)
 TabRaidBtn.BackgroundColor3 = Color3.fromRGB(18, 38, 72)
-TabRaidBtn.Text = "⚔️ Incursión"
+TabRaidBtn.Text = "[R] Incursión"
 TabRaidBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabRaidBtn.Font = Enum.Font.GothamBold
 TabRaidBtn.TextSize = 10
@@ -2772,7 +2772,7 @@ local TabFarmBtn = Instance.new("TextButton")
 TabFarmBtn.Size = UDim2.new(0.188, 0, 1, 0)
 TabFarmBtn.Position = UDim2.new(0.203, 0, 0, 0)
 TabFarmBtn.BackgroundColor3 = Color3.fromRGB(14, 28, 55)
-TabFarmBtn.Text = "🌍 Granja"
+TabFarmBtn.Text = "[F] Granja"
 TabFarmBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 TabFarmBtn.Font = Enum.Font.GothamBold
 TabFarmBtn.TextSize = 10
@@ -2783,7 +2783,7 @@ local TabQuirkBtn = Instance.new("TextButton")
 TabQuirkBtn.Size = UDim2.new(0.188, 0, 1, 0)
 TabQuirkBtn.Position = UDim2.new(0.406, 0, 0, 0)
 TabQuirkBtn.BackgroundColor3 = Color3.fromRGB(14, 28, 55)
-TabQuirkBtn.Text = "🔮 Tirada"
+TabQuirkBtn.Text = "[T] Tirada"
 TabQuirkBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 TabQuirkBtn.Font = Enum.Font.GothamBold
 TabQuirkBtn.TextSize = 10
@@ -2794,7 +2794,7 @@ local TabSettingBtn = Instance.new("TextButton")
 TabSettingBtn.Size = UDim2.new(0.188, 0, 1, 0)
 TabSettingBtn.Position = UDim2.new(0.609, 0, 0, 0)
 TabSettingBtn.BackgroundColor3 = Color3.fromRGB(14, 28, 55)
-TabSettingBtn.Text = "⚙️ Ajustes"
+TabSettingBtn.Text = "[S] Ajustes"
 TabSettingBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 TabSettingBtn.Font = Enum.Font.GothamBold
 TabSettingBtn.TextSize = 10
@@ -2805,7 +2805,7 @@ local TabInfoBtn = Instance.new("TextButton")
 TabInfoBtn.Size = UDim2.new(0.188, 0, 1, 0)
 TabInfoBtn.Position = UDim2.new(0.812, 0, 0, 0)
 TabInfoBtn.BackgroundColor3 = Color3.fromRGB(14, 28, 55)
-TabInfoBtn.Text = "ℹ️ Info"
+TabInfoBtn.Text = "[I] Info"
 TabInfoBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 TabInfoBtn.Font = Enum.Font.GothamBold
 TabInfoBtn.TextSize = 10
@@ -2826,7 +2826,7 @@ TypeSelector = Instance.new("TextButton")
 TypeSelector.Size = UDim2.new(1, 0, 0, 24)
 TypeSelector.Position = UDim2.new(0, 0, 0, 0)
 TypeSelector.BackgroundColor3 = Color3.fromRGB(16, 40, 78)
-TypeSelector.Text = "Modo: ⚔️ Incursión normal"
+TypeSelector.Text = "Modo: [R] Incursión normal"
 TypeSelector.TextColor3 = Color3.fromRGB(100, 210, 255)
 TypeSelector.Font = Enum.Font.GothamBold
 TypeSelector.TextSize = 11
@@ -2882,7 +2882,7 @@ do
     cBtn.Size = UDim2.new(0.73, 0, 0, 22)
     cBtn.Position = UDim2.new(0, 0, 0, 50)
     cBtn.BackgroundColor3 = Color3.fromRGB(48, 38, 72)
-    cBtn.Text = "📝 Elegir objetivo / Runas de mapa"
+    cBtn.Text = "[P] Elegir objetivo / Runas de mapa"
     cBtn.TextColor3 = Color3.fromRGB(235, 210, 255)
     cBtn.Font = Enum.Font.GothamBold
     cBtn.TextSize = 10
@@ -2896,7 +2896,7 @@ do
     rstBtn.Size = UDim2.new(0.25, 0, 0, 22)
     rstBtn.Position = UDim2.new(0.75, 0, 0, 50)
     rstBtn.BackgroundColor3 = Color3.fromRGB(62, 36, 44)
-    rstBtn.Text = "🔁 Reiniciar 0"
+    rstBtn.Text = "[<] Reiniciar 0"
     rstBtn.TextColor3 = Color3.fromRGB(255, 190, 190)
     rstBtn.Font = Enum.Font.GothamBold
     rstBtn.TextSize = 9
@@ -2912,7 +2912,7 @@ do
     pBox.BorderSizePixel = 0
     pBox.RichText = true
     pBox.TextWrapped = true
-    pBox.Text = "Sin objetivo: pulsa 📝 Elegir objetivo / Runas arriba"
+    pBox.Text = "Sin objetivo: pulsa [P] Elegir objetivo / Runas arriba"
     pBox.TextColor3 = Color3.fromRGB(200, 205, 225)
     pBox.Font = Enum.Font.GothamBold
     pBox.TextSize = 9
@@ -2937,7 +2937,7 @@ do
     rSum.Position = UDim2.new(0, 0, 0, 165)
     rSum.BackgroundColor3 = Color3.fromRGB(24, 22, 34)
     rSum.BorderSizePixel = 0
-    rSum.Text = "⬇️Abajo: -- | ⬆️Arriba: -- | 🗺️Runas mapa: NO"
+    rSum.Text = "[v]Abajo: -- | [^]Arriba: -- | [M]Runas mapa: NO"
     rSum.TextColor3 = Color3.fromRGB(185, 215, 245)
     rSum.Font = Enum.Font.GothamBold
     rSum.TextSize = 9
@@ -2965,7 +2965,7 @@ do
     mTitle.Size = UDim2.new(1, -16, 0, 18)
     mTitle.Position = UDim2.new(0, 8, 0, 6)
     mTitle.BackgroundTransparency = 1
-    mTitle.Text = "🎯 Cola de ascensión (recoge la primera puerta que aparezca | cuenta 0/objetivo)"
+    mTitle.Text = "[*] Cola de ascensión (recoge la primera puerta que aparezca | cuenta 0/objetivo)"
     mTitle.TextColor3 = Color3.fromRGB(255, 210, 95)
     mTitle.Font = Enum.Font.GothamBold
     mTitle.TextSize = 10
@@ -2976,7 +2976,7 @@ do
     mRune.Size = UDim2.new(1, -16, 0, 14)
     mRune.Position = UDim2.new(0, 8, 0, 25)
     mRune.BackgroundTransparency = 1
-    mRune.Text = "Runas: ⬇️Abajo x-- | ⬆️Arriba x--"
+    mRune.Text = "Runas: [v]Abajo x-- | [^]Arriba x--"
     mRune.TextColor3 = Color3.fromRGB(175, 215, 245)
     mRune.Font = Enum.Font.Gotham
     mRune.TextSize = 9
@@ -3019,7 +3019,7 @@ do
     mapRuneBtn.Size = UDim2.new(0.40, 0, 1, 0)
     mapRuneBtn.Position = UDim2.new(0.60, 0, 0, 0)
     mapRuneBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 50)
-    mapRuneBtn.Text = "🗺️ Runas de mapa: NO"
+    mapRuneBtn.Text = "[M] Runas de mapa: NO"
     mapRuneBtn.TextColor3 = Color3.fromRGB(185, 185, 195)
     mapRuneBtn.Font = Enum.Font.GothamBold
     mapRuneBtn.TextSize = 9
@@ -3211,7 +3211,7 @@ do
     hdr.Size = UDim2.new(1, -6, 0, 16)
     hdr.Position = UDim2.new(0, 0, 0, 128)
     hdr.BackgroundTransparency = 1
-    hdr.Text = "⚡ Skill Bug"
+    hdr.Text = "[+] Skill Bug"
     hdr.TextColor3 = Color3.fromRGB(255, 205, 95)
     hdr.Font = Enum.Font.GothamBold
     hdr.TextSize = 10
@@ -3222,7 +3222,7 @@ do
     lock1.Size = UDim2.new(1, -6, 0, 24)
     lock1.Position = UDim2.new(0, 0, 0, 147)
     lock1.BackgroundColor3 = Color3.fromRGB(32, 42, 60)
-    lock1.Text = "🎯 Objetivo: Auto (más cercano)"
+    lock1.Text = "[*] Objetivo: Auto (más cercano)"
     lock1.TextColor3 = Color3.fromRGB(160, 215, 255)
     lock1.Font = Enum.Font.GothamBold
     lock1.TextSize = 10
@@ -3235,7 +3235,7 @@ do
     speedBtn.Size = UDim2.new(1, -6, 0, 22)
     speedBtn.Position = UDim2.new(0, 0, 0, 175)
     speedBtn.BackgroundColor3 = Color3.fromRGB(14, 40, 85)
-    speedBtn.Text = "⚡ Velocidad: RÁPIDA (0.12s)"
+    speedBtn.Text = "[+] Velocidad: RÁPIDA (0.12s)"
     speedBtn.TextColor3 = Color3.fromRGB(255, 220, 130)
     speedBtn.Font = Enum.Font.GothamBold
     speedBtn.TextSize = 10
@@ -3285,7 +3285,7 @@ do
     title.Size = UDim2.new(1, -16, 0, 20)
     title.Position = UDim2.new(0, 8, 0, 6)
     title.BackgroundTransparency = 1
-    title.Text = "🎯 Elegir objetivo para atacar (Skill Bug)"
+    title.Text = "[*] Elegir objetivo para atacar (Skill Bug)"
     title.TextColor3 = Color3.fromRGB(130, 210, 255)
     title.Font = Enum.Font.GothamBold
     title.TextSize = 11
@@ -3341,7 +3341,7 @@ do
     closeBtn.Size = UDim2.new(0.30, 0, 1, 0)
     closeBtn.Position = UDim2.new(0.70, 0, 0, 0)
     closeBtn.BackgroundColor3 = Color3.fromRGB(70, 35, 40)
-    closeBtn.Text = "✖ Cerrar"
+    closeBtn.Text = "[X] Cerrar"
     closeBtn.TextColor3 = Color3.fromRGB(255, 190, 190)
     closeBtn.Font = Enum.Font.GothamBold
     closeBtn.TextSize = 9
@@ -3374,7 +3374,7 @@ do
     dbHdr.Size = UDim2.new(1, -6, 0, 16)
     dbHdr.Position = UDim2.new(0, 0, 0, 263)
     dbHdr.BackgroundTransparency = 1
-    dbHdr.Text = "🐉 Radar de Dragon Ball (7 esferas gratis)"
+    dbHdr.Text = "[D] Radar de Dragon Ball (7 esferas gratis)"
     dbHdr.TextColor3 = Color3.fromRGB(80, 200, 255)
     dbHdr.Font = Enum.Font.GothamBold
     dbHdr.TextSize = 10
@@ -3406,7 +3406,7 @@ do
     dbList.Size = UDim2.new(1, -10, 1, -6)
     dbList.Position = UDim2.new(0, 5, 0, 3)
     dbList.BackgroundTransparency = 1
-    dbList.Text = "• Aún no escaneado (pulsa 🔍 Escanear radar)"
+    dbList.Text = "• Aún no escaneado (pulsa [?] Escanear radar)"
     dbList.TextColor3 = Color3.fromRGB(235, 235, 240)
     dbList.Font = Enum.Font.Gotham
     dbList.TextSize = 9
@@ -3420,7 +3420,7 @@ do
     dbScan.Size = UDim2.new(0.47, 0, 0, 26)
     dbScan.Position = UDim2.new(0, 0, 0, 377)
     dbScan.BackgroundColor3 = Color3.fromRGB(12, 50, 110)
-    dbScan.Text = "🔍 Escanear radar"
+    dbScan.Text = "[?] Escanear radar"
     dbScan.TextColor3 = Color3.fromRGB(210, 235, 255)
     dbScan.Font = Enum.Font.GothamBold
     dbScan.TextSize = 10
@@ -3432,7 +3432,7 @@ do
     dbCollect.Size = UDim2.new(0.50, -6, 0, 26)
     dbCollect.Position = UDim2.new(0.50, 0, 0, 377)
     dbCollect.BackgroundColor3 = Color3.fromRGB(210, 120, 30)
-    dbCollect.Text = "🚀 Recoger todo automáticamente"
+    dbCollect.Text = "[>] Recoger todo automáticamente"
     dbCollect.TextColor3 = Color3.fromRGB(255, 255, 255)
     dbCollect.Font = Enum.Font.GothamBold
     dbCollect.TextSize = 10
@@ -3444,7 +3444,7 @@ do
     dbAuto.Size = UDim2.new(1, -6, 0, 26)
     dbAuto.Position = UDim2.new(0, 0, 0, 408)
     dbAuto.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
-    dbAuto.Text = "♻️ Recolección automática: DESACTIVADA (manual)"
+    dbAuto.Text = "[<] Recolección automática: DESACTIVADA (manual)"
     dbAuto.TextColor3 = Color3.fromRGB(180, 180, 180)
     dbAuto.Font = Enum.Font.GothamBold
     dbAuto.TextSize = 10
@@ -3470,7 +3470,7 @@ local QuirkTypeBtn = Instance.new("TextButton")
 QuirkTypeBtn.Size = UDim2.new(1, -6, 0, 24)
 QuirkTypeBtn.Position = UDim2.new(0, 0, 0, 0)
 QuirkTypeBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 75)
-QuirkTypeBtn.Text = "🔮 Modo: 👤 Rasgo de héroe"
+QuirkTypeBtn.Text = "[T] Modo: [H] Rasgo de héroe"
 QuirkTypeBtn.TextColor3 = Color3.fromRGB(170, 215, 255)
 QuirkTypeBtn.Font = Enum.Font.GothamBold
 QuirkTypeBtn.TextSize = 10
@@ -3481,7 +3481,7 @@ local QuirkSlotBtn = Instance.new("TextButton")
 QuirkSlotBtn.Size = UDim2.new(1, -6, 0, 24)
 QuirkSlotBtn.Position = UDim2.new(0, 0, 0, 28)
 QuirkSlotBtn.BackgroundColor3 = Color3.fromRGB(35, 45, 60)
-QuirkSlotBtn.Text = "📍 Ranura: Ranura 1 (Núcleo rojo)"
+QuirkSlotBtn.Text = "[.] Ranura: Ranura 1 (Núcleo rojo)"
 QuirkSlotBtn.TextColor3 = Color3.fromRGB(150, 210, 255)
 QuirkSlotBtn.Font = Enum.Font.GothamBold
 QuirkSlotBtn.TextSize = 10
@@ -3514,7 +3514,7 @@ local QuirkPresetBtn = Instance.new("TextButton")
 QuirkPresetBtn.Size = UDim2.new(1, -6, 0, 24)
 QuirkPresetBtn.Position = UDim2.new(0, 0, 0, 94)
 QuirkPresetBtn.BackgroundColor3 = Color3.fromRGB(45, 50, 35)
-QuirkPresetBtn.Text = "🎯 Objetivo: 🌟 Solo mítico (Q5+)"
+QuirkPresetBtn.Text = "[*] Objetivo: [*] Solo mítico (Q5+)"
 QuirkPresetBtn.TextColor3 = Color3.fromRGB(120, 210, 255)
 QuirkPresetBtn.Font = Enum.Font.GothamBold
 QuirkPresetBtn.TextSize = 10
@@ -3525,7 +3525,7 @@ local QuirkPickTargetBtn = Instance.new("TextButton")
 QuirkPickTargetBtn.Size = UDim2.new(1, -6, 0, 24)
 QuirkPickTargetBtn.Position = UDim2.new(0, 0, 0, 122)
 QuirkPickTargetBtn.BackgroundColor3 = Color3.fromRGB(16, 40, 78)
-QuirkPickTargetBtn.Text = "📝 Elegir / fijar rasgos específicos"
+QuirkPickTargetBtn.Text = "[P] Elegir / fijar rasgos específicos"
 QuirkPickTargetBtn.TextColor3 = Color3.fromRGB(180, 200, 255)
 QuirkPickTargetBtn.Font = Enum.Font.GothamBold
 QuirkPickTargetBtn.TextSize = 10
@@ -3536,7 +3536,7 @@ local QuirkSpeedBtn = Instance.new("TextButton")
 QuirkSpeedBtn.Size = UDim2.new(1, -6, 0, 24)
 QuirkSpeedBtn.Position = UDim2.new(0, 0, 0, 150)
 QuirkSpeedBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
-QuirkSpeedBtn.Text = "⚡ Velocidad: RÁPIDA (0.15s)"
+QuirkSpeedBtn.Text = "[+] Velocidad: RÁPIDA (0.15s)"
 QuirkSpeedBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
 QuirkSpeedBtn.Font = Enum.Font.GothamBold
 QuirkSpeedBtn.TextSize = 10
@@ -3732,7 +3732,7 @@ local ModalTitle = Instance.new("TextLabel")
 ModalTitle.Size = UDim2.new(1, -16, 0, 22)
 ModalTitle.Position = UDim2.new(0, 8, 0, 4)
 ModalTitle.BackgroundTransparency = 1
-ModalTitle.Text = "🎯 Elige niveles de incursión (puedes marcar varios, p. ej., D, B)"
+ModalTitle.Text = "[*] Elige niveles de incursión (puedes marcar varios, p. ej., D, B)"
 ModalTitle.TextColor3 = Color3.fromRGB(80, 210, 255)
 ModalTitle.Font = Enum.Font.GothamBold
 ModalTitle.TextSize = 11
@@ -3896,7 +3896,7 @@ local QModalTitle = Instance.new("TextLabel")
 QModalTitle.Size = UDim2.new(1, -16, 0, 20)
 QModalTitle.Position = UDim2.new(0, 8, 0, 6)
 QModalTitle.BackgroundTransparency = 1
-QModalTitle.Text = "🎯 Seleccionar rasgos objetivo (autodetención)"
+QModalTitle.Text = "[*] Seleccionar rasgos objetivo (autodetención)"
 QModalTitle.TextColor3 = Color3.fromRGB(120, 210, 255)
 QModalTitle.Font = Enum.Font.GothamBold
 QModalTitle.TextSize = 11
@@ -3925,7 +3925,7 @@ QM.MythicBtn = Instance.new("TextButton")
 QM.MythicBtn.Size = UDim2.new(0.24, 0, 1, 0)
 QM.MythicBtn.Position = UDim2.new(0, 0, 0, 0)
 QM.MythicBtn.BackgroundColor3 = Color3.fromRGB(60, 45, 25)
-QM.MythicBtn.Text = "🌟 Q5+"
+QM.MythicBtn.Text = "[*] Q5+"
 QM.MythicBtn.TextColor3 = Color3.fromRGB(120, 215, 255)
 QM.MythicBtn.Font = Enum.Font.GothamBold
 QM.MythicBtn.TextSize = 9
@@ -3937,7 +3937,7 @@ QM.LegBtn = Instance.new("TextButton")
 QM.LegBtn.Size = UDim2.new(0.24, 0, 1, 0)
 QM.LegBtn.Position = UDim2.new(0.25, 0, 0, 0)
 QM.LegBtn.BackgroundColor3 = Color3.fromRGB(50, 35, 60)
-QM.LegBtn.Text = "✨ Q4+"
+QM.LegBtn.Text = "[*] Q4+"
 QM.LegBtn.TextColor3 = Color3.fromRGB(170, 215, 255)
 QM.LegBtn.Font = Enum.Font.GothamBold
 QM.LegBtn.TextSize = 9
@@ -4099,15 +4099,15 @@ local function updateSelectors()
     local curMap = getCurrentMapConfig()
     local isRuneQueueMode = (raidTypeIndex == 3)
     if raidTypeIndex == 1 then
-        TypeSelector.Text = "Modo: ⚔️ Incursión normal"
+        TypeSelector.Text = "Modo: [R] Incursión normal"
         TypeSelector.TextColor3 = Color3.fromRGB(100, 210, 255)
         TypeSelector.BackgroundColor3 = Color3.fromRGB(16, 40, 78)
     elseif raidTypeIndex == 2 then
-        TypeSelector.Text = "Modo: 🗼 Torre de ascensión"
+        TypeSelector.Text = "Modo: [T] Torre de ascensión"
         TypeSelector.TextColor3 = Color3.fromRGB(255, 175, 80)
         TypeSelector.BackgroundColor3 = Color3.fromRGB(50, 35, 45)
     else
-        TypeSelector.Text = "Mode: 💎 Asc + Rune Queue"
+        TypeSelector.Text = "Mode: [Q] Asc + Rune Queue"
         TypeSelector.TextColor3 = Color3.fromRGB(215, 145, 255)
         TypeSelector.BackgroundColor3 = Color3.fromRGB(52, 32, 72)
     end
@@ -4448,14 +4448,14 @@ do
             if OPT.redeemingCodes then return end
             OPT.redeemingCodes = true
             OPT.CodesBtn.BackgroundColor3 = Color3.fromRGB(95, 70, 35)
-            OPT.CodesBtn.Text = "⏳ Comprobando códigos..."
+            OPT.CodesBtn.Text = "[...] Comprobando códigos..."
 
             task.spawn(function()
                 local ok, err = pcall(function()
                     ensureManagers()
                     local codeCfg = ConfigManager and ConfigManager.GetConfig and ConfigManager.GetConfig("Code")
                     if not codeCfg or not codeCfg.data then
-                        OPT.CodesBtn.Text = "❌ No se encontraron códigos en el juego"
+                        OPT.CodesBtn.Text = "[X] No se encontraron códigos en el juego"
                         task.wait(2.5)
                         return
                     end
@@ -4481,7 +4481,7 @@ do
 
                     if #todo == 0 then
                         OPT.CodesBtn.BackgroundColor3 = Color3.fromRGB(35, 75, 45)
-                        OPT.CodesBtn.Text = "✅ ¡Todos los códigos disponibles canjeados!"
+                        OPT.CodesBtn.Text = "[OK] ¡Todos los códigos disponibles canjeados!"
                         task.wait(2.5)
                         return
                     end
@@ -4518,13 +4518,13 @@ do
                     end)
 
                     OPT.CodesBtn.BackgroundColor3 = Color3.fromRGB(35, 75, 45)
-                    OPT.CodesBtn.Text = string.format("✅ Listo: nuevos +%d (duplicados %d)", okCount, dupCount)
+                    OPT.CodesBtn.Text = string.format("[OK] Listo: nuevos +%d (duplicados %d)", okCount, dupCount)
                     task.wait(3.0)
                 end)
 
                 if not ok and OPT.CodesBtn then
                     OPT.CodesBtn.BackgroundColor3 = Color3.fromRGB(120, 45, 45)
-                    OPT.CodesBtn.Text = "❌ Error: " .. tostring(err):sub(1, 25)
+                    OPT.CodesBtn.Text = "[X] Error: " .. tostring(err):sub(1, 25)
                     task.wait(2.5)
                 end
 
@@ -4652,11 +4652,11 @@ do
         if not DB.AutoBtn then return end
         if DB.autoLoop then
             DB.AutoBtn.BackgroundColor3 = Color3.fromRGB(35, 65, 45)
-            DB.AutoBtn.Text = "♻️ Recolección automática: ACTIVADA"
+            DB.AutoBtn.Text = "[<] Recolección automática: ACTIVADA"
             DB.AutoBtn.TextColor3 = Color3.fromRGB(120, 255, 160)
         else
             DB.AutoBtn.BackgroundColor3 = Color3.fromRGB(16, 32, 62)
-            DB.AutoBtn.Text = "♻️ Recolección automática: DESACTIVADA (manual)"
+            DB.AutoBtn.Text = "[<] Recolección automática: DESACTIVADA (manual)"
             DB.AutoBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
         end
     end
@@ -4665,10 +4665,10 @@ do
         if not DB.CollectBtn then return end
         if DB.collecting then
             DB.CollectBtn.BackgroundColor3 = Color3.fromRGB(190, 55, 55)
-            DB.CollectBtn.Text = "⏹️ Detener recolección"
+            DB.CollectBtn.Text = "[||] Detener recolección"
         else
             DB.CollectBtn.BackgroundColor3 = Color3.fromRGB(210, 120, 30)
-            DB.CollectBtn.Text = "🚀 Recoger todo automáticamente"
+            DB.CollectBtn.Text = "[>] Recoger todo automáticamente"
         end
     end
 
@@ -4730,18 +4730,18 @@ do
             DB.StatusLabel.Text = customStatus
             DB.StatusLabel.TextColor3 = Color3.fromRGB(255, 220, 120)
         elseif isLive then
-            DB.StatusLabel.Text = string.format("🐉 Ronda #%d | quedan %d esferas (%s más)", snap.roundId or 0, #entries, formatMMSS(snap.expireAt - now))
+            DB.StatusLabel.Text = string.format("[D] Ronda #%d | quedan %d esferas (%s más)", snap.roundId or 0, #entries, formatMMSS(snap.expireAt - now))
             DB.StatusLabel.TextColor3 = Color3.fromRGB(125, 255, 165)
         else
             local nextWait = getNextSpawnInfo()
             if snap and snap.isVisible == true and snap.expireAt and now < snap.expireAt and #entries == 0 then
-                DB.StatusLabel.Text = string.format("✅ ¡Ronda #%d completada! Esperando la nueva ronda %s", snap.roundId or 0, nextWait and formatMMSS(nextWait) or "--:--")
+                DB.StatusLabel.Text = string.format("[OK] ¡Ronda #%d completada! Esperando la nueva ronda %s", snap.roundId or 0, nextWait and formatMMSS(nextWait) or "--:--")
                 DB.StatusLabel.TextColor3 = Color3.fromRGB(150, 230, 255)
             elseif nextWait then
-                DB.StatusLabel.Text = string.format("⏳ Esperando la siguiente ronda: %s", formatMMSS(nextWait))
+                DB.StatusLabel.Text = string.format("[...] Esperando la siguiente ronda: %s", formatMMSS(nextWait))
                 DB.StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 110)
             else
-                DB.StatusLabel.Text = "Radar: pulsa 🔍 Escanear para obtener los datos de las esferas"
+                DB.StatusLabel.Text = "Radar: pulsa [?] Escanear para obtener los datos de las esferas"
                 DB.StatusLabel.TextColor3 = Color3.fromRGB(190, 225, 255)
             end
         end
@@ -4782,7 +4782,7 @@ do
             local starStrs = {}
             for _, st in ipairs(byMap[mId]) do
                 if st == 7 then
-                    table.insert(starStrs, "🌟7★")
+                    table.insert(starStrs, "[*]7★")
                 else
                     table.insert(starStrs, tostring(st) .. "★")
                 end
@@ -4798,7 +4798,7 @@ do
         local snap = DB.fetchSnap(true)
         local now = Workspace:GetServerTimeNow()
         if not snap or not snap.isVisible or not snap.expireAt or now >= snap.expireAt or not snap.entries or #snap.entries == 0 then
-            DB.renderUI("⏳ No hay esferas para recoger en esta ronda")
+            DB.renderUI("[...] No hay esferas para recoger en esta ronda")
             return
         end
 
@@ -4849,11 +4849,11 @@ do
             for _, targetMapId in ipairs(mapOrder) do
                 if not DB.collecting then break end
                 if not isMapUnlocked(targetMapId) then
-                    DB.renderUI("⚠️ Saltar " .. getMapLabel(targetMapId) .. " (aún no desbloqueado)")
+                    DB.renderUI("[!] Saltar " .. getMapLabel(targetMapId) .. " (aún no desbloqueado)")
                     task.wait(0.6)
                 else
                     if getCurMapIdSafe() ~= targetMapId then
-                        DB.renderUI("🚀 Teletransportando a " .. getMapLabel(targetMapId) .. "...")
+                        DB.renderUI("[>] Teletransportando a " .. getMapLabel(targetMapId) .. "...")
                         teleportToMap(targetMapId)
                         local t0 = os.clock()
                         repeat
@@ -4873,7 +4873,7 @@ do
                         if curInst then
                             for _, entry in ipairs(byMap[targetMapId]) do
                                 if not DB.collecting then break end
-                                DB.renderUI(string.format("🐉 Recogiendo %s★ en %s...", tostring(entry.starId or "?"), getMapLabel(targetMapId)))
+                                DB.renderUI(string.format("[D] Recogiendo %s★ en %s...", tostring(entry.starId or "?"), getMapLabel(targetMapId)))
                                 local worldPos = curInst:GetPivot():PointToWorldSpace(Vector3.new(entry.x, entry.y, entry.z))
                                 local cRes = nil
                                 for attempt = 1, 2 do
@@ -4924,7 +4924,7 @@ do
                                     if cRes.success == true then
                                         collectedCount = collectedCount + 1
                                     elseif cRes.message then
-                                        DB.renderUI("⚠️ " .. tostring(cRes.message))
+                                        DB.renderUI("[!] " .. tostring(cRes.message))
                                     end
                                 end
                                 if hideDropsEnabled then
@@ -4946,7 +4946,7 @@ do
             end
 
             if not finishedClean then
-                DB.renderUI("⏹️ Recolección detenida (" .. collectedCount .. "/" .. totalBalls .. " esferas)")
+                DB.renderUI("[||] Recolección detenida (" .. collectedCount .. "/" .. totalBalls .. " esferas)")
             else
                 DB.collecting = false
                 task.wait(0.75)
@@ -4963,7 +4963,7 @@ do
                     DB.lastCollectedRound = snap.roundId
                     DB.retryCount = 0
                     DB.retryAfter = 0
-                    DB.renderUI(string.format("✅ Recolección completada: %d/%d esferas (ronda #%d)", collectedCount, totalBalls, snap.roundId or 0))
+                    DB.renderUI(string.format("[OK] Recolección completada: %d/%d esferas (ronda #%d)", collectedCount, totalBalls, snap.roundId or 0))
                 else
                     if DB.retryRound ~= snap.roundId then
                         DB.retryRound = snap.roundId
@@ -4974,7 +4974,7 @@ do
                     if DB.retryCount >= 6 then
                         DB.lastCollectedRound = snap.roundId
                     end
-                    DB.renderUI(string.format("⚠️ Quedan %d esferas; se intentará de nuevo en 15 s", remainingUnlocked))
+                    DB.renderUI(string.format("[!] Quedan %d esferas; se intentará de nuevo en 15 s", remainingUnlocked))
                 end
             end
         end)
@@ -4982,14 +4982,14 @@ do
         DB.collecting = false
         DB.updateCollectBtnVisuals()
         if not okRun then
-            DB.renderUI("❌ Error: " .. tostring(errRun):sub(1, 45))
+            DB.renderUI("[X] Error: " .. tostring(errRun):sub(1, 45))
         end
     end
 
     if DB.ScanBtn then
         DB.ScanBtn.MouseButton1Click:Connect(function()
             task.spawn(function()
-                DB.renderUI("🔍 Escaneando esferas...")
+                DB.renderUI("[?] Escaneando esferas...")
                 DB.fetchSnap(true)
                 DB.renderUI()
             end)
@@ -5255,31 +5255,31 @@ do
                     elseif goal.grade <= 9 and diff == -1 and downCount >= 1 then
                         consider({
                             raidId = g.raidId, mapId = mId, cost = 1, goalGrade = goal.grade,
-                            slot1 = RANK_DOWN_ID, slot2 = nil, desc = "⬇️Down x1",
+                            slot1 = RANK_DOWN_ID, slot2 = nil, desc = "[v]Down x1",
                             goalMat = goal.mat, goalHave = goal.have, goalTarget = goal.target,
                         })
                     elseif goal.grade <= 9 and diff == -2 and downCount >= 2 then
                         consider({
                             raidId = g.raidId, mapId = mId, cost = 2, goalGrade = goal.grade,
-                            slot1 = RANK_DOWN_ID, slot2 = RANK_DOWN_ID, desc = "⬇️Down x2",
+                            slot1 = RANK_DOWN_ID, slot2 = RANK_DOWN_ID, desc = "[v]Down x2",
                             goalMat = goal.mat, goalHave = goal.have, goalTarget = goal.target,
                         })
                     elseif goal.grade == 9 and diff == 1 and upCount >= 1 then
                         consider({
                             raidId = g.raidId, mapId = mId, cost = 1, goalGrade = goal.grade,
-                            slot1 = RANK_UP_ID, slot2 = nil, desc = "⬆️Up x1 (G→N)",
+                            slot1 = RANK_UP_ID, slot2 = nil, desc = "[^]Up x1 (G→N)",
                             goalMat = goal.mat, goalHave = goal.have, goalTarget = goal.target,
                         })
                     elseif goal.grade == 10 and diff == 1 and upCount >= 1 then
                         consider({
                             raidId = g.raidId, mapId = mId, cost = 1, goalGrade = goal.grade,
-                            slot1 = RANK_UP_ID, slot2 = nil, desc = "⬆️Up x1 (N→M)",
+                            slot1 = RANK_UP_ID, slot2 = nil, desc = "[^]Up x1 (N→M)",
                             goalMat = goal.mat, goalHave = goal.have, goalTarget = goal.target,
                         })
                     elseif goal.grade == 10 and diff == 2 and upCount >= 2 then
                         consider({
                             raidId = g.raidId, mapId = mId, cost = 2, goalGrade = goal.grade,
-                            slot1 = RANK_UP_ID, slot2 = RANK_UP_ID, desc = "⬆️Up x2 (G→M)",
+                            slot1 = RANK_UP_ID, slot2 = RANK_UP_ID, desc = "[^]Up x2 (G→M)",
                             goalMat = goal.mat, goalHave = goal.have, goalTarget = goal.target,
                         })
                     end
@@ -5305,19 +5305,19 @@ do
                                 if diff == 0 then
                                     consider({
                                         raidId = g.raidId, mapId = mId, cost = 10, goalGrade = goal.grade,
-                                        slot1 = mapRuneId, slot2 = nil, desc = "🗺️MapRune",
+                                        slot1 = mapRuneId, slot2 = nil, desc = "[M]MapRune",
                                         goalMat = goal.mat, goalHave = goal.have, goalTarget = goal.target,
                                     })
                                 elseif goal.grade <= 9 and diff == -1 and downCount >= 1 then
                                     consider({
                                         raidId = g.raidId, mapId = mId, cost = 11, goalGrade = goal.grade,
-                                        slot1 = mapRuneId, slot2 = RANK_DOWN_ID, desc = "🗺️Map+⬇️Down",
+                                        slot1 = mapRuneId, slot2 = RANK_DOWN_ID, desc = "[M]Map+[v]Down",
                                         goalMat = goal.mat, goalHave = goal.have, goalTarget = goal.target,
                                     })
                                 elseif (goal.grade == 9 or goal.grade == 10) and diff == 1 and upCount >= 1 then
                                     consider({
                                         raidId = g.raidId, mapId = mId, cost = 11, goalGrade = goal.grade,
-                                        slot1 = mapRuneId, slot2 = RANK_UP_ID, desc = "🗺️Map+⬆️Up",
+                                        slot1 = mapRuneId, slot2 = RANK_UP_ID, desc = "[M]Map+[^]Up",
                                         goalMat = goal.mat, goalHave = goal.have, goalTarget = goal.target,
                                     })
                                 end
@@ -5446,21 +5446,21 @@ do
         if AQ.ConfigBtn then
             if totalSet == 0 then
                 AQ.ConfigBtn.BackgroundColor3 = Color3.fromRGB(62, 42, 85)
-                AQ.ConfigBtn.Text = "📝 Elegir objetivo / Runas de mapa"
+                AQ.ConfigBtn.Text = "[P] Elegir objetivo / Runas de mapa"
                 AQ.ConfigBtn.TextColor3 = Color3.fromRGB(255, 225, 130)
             elseif doneCount >= totalSet then
                 AQ.ConfigBtn.BackgroundColor3 = Color3.fromRGB(30, 68, 42)
-                AQ.ConfigBtn.Text = string.format("✅ Completo (%d/%d) | 📝 Elegir objetivo", doneCount, totalSet)
+                AQ.ConfigBtn.Text = string.format("[OK] Completo (%d/%d) | [P] Elegir objetivo", doneCount, totalSet)
                 AQ.ConfigBtn.TextColor3 = Color3.fromRGB(130, 255, 165)
             else
                 AQ.ConfigBtn.BackgroundColor3 = Color3.fromRGB(48, 38, 72)
-                AQ.ConfigBtn.Text = string.format("📝 Elegir objetivo / Runas mapa (%d/%d completos)", doneCount, totalSet)
+                AQ.ConfigBtn.Text = string.format("[P] Elegir objetivo / Runas mapa (%d/%d completos)", doneCount, totalSet)
                 AQ.ConfigBtn.TextColor3 = Color3.fromRGB(235, 210, 255)
             end
         end
         if AQ.ProgressBox then
             if totalSet == 0 then
-                AQ.ProgressBox.Text = '<font color="#B8B8CE">ยังไม่ตั้งเป้า — กดปุ่ม 📝 ตั้งเป้า / รูนแมพ ด้านบน</font>'
+                AQ.ProgressBox.Text = '<font color="#B8B8CE">ยังไม่ตั้งเป้า — กดปุ่ม [P] ตั้งเป้า / รูนแมพ ด้านบน</font>'
             else
                 AQ.ProgressBox.Text = table.concat(chips, ' <font color="#6E6688">|</font> ')
             end
@@ -5469,7 +5469,7 @@ do
             local downCnt = AQ.getItemCount(RANK_DOWN_ID)
             local upCnt = AQ.getItemCount(RANK_UP_ID)
             AQ.RuneSummaryLbl.Text = string.format(
-                "⬇️Abajo: %d | ⬆️Arriba: %d | 🗺️Runas mapa: %s",
+                "[v]Abajo: %d | [^]Arriba: %d | [M]Runas mapa: %s",
                 downCnt,
                 upCnt,
                 AQ.allowMapRune and "ON" or "OFF"
@@ -5484,16 +5484,16 @@ do
         local upCnt = AQ.getItemCount(RANK_UP_ID)
 
         if AQ.ModalRuneLbl then
-            AQ.ModalRuneLbl.Text = string.format("%s | ⬇️Down:%d ⬆️Up:%d", cfg.name, downCnt, upCnt)
+            AQ.ModalRuneLbl.Text = string.format("%s | [v]Down:%d [^]Up:%d", cfg.name, downCnt, upCnt)
         end
         if AQ.ModalMapRuneBtn then
             if AQ.allowMapRune then
                 AQ.ModalMapRuneBtn.BackgroundColor3 = Color3.fromRGB(38, 72, 52)
-                AQ.ModalMapRuneBtn.Text = "🗺️ Runas de mapa: SÍ"
+                AQ.ModalMapRuneBtn.Text = "[M] Runas de mapa: SÍ"
                 AQ.ModalMapRuneBtn.TextColor3 = Color3.fromRGB(140, 255, 170)
             else
                 AQ.ModalMapRuneBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 50)
-                AQ.ModalMapRuneBtn.Text = "🗺️ Runas de mapa: NO"
+                AQ.ModalMapRuneBtn.Text = "[M] Runas de mapa: NO"
                 AQ.ModalMapRuneBtn.TextColor3 = Color3.fromRGB(185, 185, 195)
             end
         end
@@ -5545,7 +5545,7 @@ do
             if AQ.Modal and AQ.Modal.Visible then
                 AQ.refreshModal()
             end
-            RaidStatusLabel.Text = "🔁 Farmeo de esta ronda reiniciado a 0"
+            RaidStatusLabel.Text = "[<] Farmeo de esta ronda reiniciado a 0"
             saveBotState(isRaidRunning)
         end)
     end
@@ -5615,7 +5615,7 @@ do
         titleLbl.Size = UDim2.new(1, -78, 0, 18)
         titleLbl.Position = UDim2.new(0, 6, 0, 3)
         titleLbl.BackgroundTransparency = 1
-        titleLbl.Text = "🎯 Boss 1% Tracker"
+        titleLbl.Text = "[*] Boss 1% Tracker"
         titleLbl.TextColor3 = Color3.fromRGB(220, 220, 230)
         titleLbl.Font = Enum.Font.GothamBold
         titleLbl.TextSize = 10
@@ -5726,7 +5726,7 @@ do
                             end
                             BossAlert.clearAt = now + 4.0
                         else
-                            BossAlert.titleLabel.Text = "🎯 " .. tostring(name)
+                            BossAlert.titleLabel.Text = "[*] " .. tostring(name)
                             BossAlert.titleLabel.TextColor3 = Color3.fromRGB(220, 220, 235)
                             BossAlert.pctLabel.Text = string.format("%.2f%% / 1%%", pct)
                             BossAlert.pctLabel.TextColor3 = Color3.fromRGB(255, 215, 110)
@@ -5833,16 +5833,16 @@ local function rebuildQuirkModalList()
     end
 
     if quirkTypeIndex == 3 then
-        QModalTitle.Text = "🛡️ Seleccionar grados de equipo objetivo (autodetención)"
+        QModalTitle.Text = "[A] Seleccionar grados de equipo objetivo (autodetención)"
         QModalSub.Text = "💡 Girará rápido y se detendrá al obtener un grado seleccionado"
-        QM.MythicBtn.Text = "👑 G+"
-        QM.LegBtn.Text = "🌟 S+"
+        QM.MythicBtn.Text = "[B] G+"
+        QM.LegBtn.Text = "[*] S+"
     else
         local typeName = (quirkTypeIndex == 1) and "Rasgos de héroe" or "Rasgos de arma"
-        QModalTitle.Text = string.format("🎯 Seleccionar %s objetivo (autodetención)", typeName)
+        QModalTitle.Text = string.format("[*] Seleccionar %s objetivo (autodetención)", typeName)
         QModalSub.Text = "💡 Girará rápido y se detendrá al obtener un rasgo seleccionado"
-        QM.MythicBtn.Text = "🌟 Q5+"
-        QM.LegBtn.Text = "✨ Q4+"
+        QM.MythicBtn.Text = "[*] Q5+"
+        QM.LegBtn.Text = "[*] Q4+"
     end
 
     local slots = (quirkTypeIndex == 1 and HERO_QUIRK_SLOTS) or (quirkTypeIndex == 2 and WEAPON_QUIRK_SLOTS) or EQUIP_GRADE_SLOTS
@@ -5983,22 +5983,22 @@ end
 
 function updateQuirkButtonVisuals()
     if quirkTypeIndex == 1 then
-        QuirkTypeBtn.Text = "🔮 Modo: 👤 Rasgo de héroe"
+        QuirkTypeBtn.Text = "[T] Modo: [H] Rasgo de héroe"
         QuirkTypeBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 75)
         QuirkTypeBtn.TextColor3 = Color3.fromRGB(170, 215, 255)
     elseif quirkTypeIndex == 2 then
-        QuirkTypeBtn.Text = "🔮 Modo: ⚔️ Rasgo de arma"
+        QuirkTypeBtn.Text = "[T] Modo: [R] Rasgo de arma"
         QuirkTypeBtn.BackgroundColor3 = Color3.fromRGB(35, 50, 60)
         QuirkTypeBtn.TextColor3 = Color3.fromRGB(150, 220, 255)
     else
-        QuirkTypeBtn.Text = "🔮 Modo: 🛡️ Grado de equipo"
+        QuirkTypeBtn.Text = "[T] Modo: [A] Grado de equipo"
         QuirkTypeBtn.BackgroundColor3 = Color3.fromRGB(60, 45, 30)
         QuirkTypeBtn.TextColor3 = Color3.fromRGB(255, 205, 120)
     end
 
     local slots = (quirkTypeIndex == 1 and HERO_QUIRK_SLOTS) or (quirkTypeIndex == 2 and WEAPON_QUIRK_SLOTS) or EQUIP_GRADE_SLOTS
     local slotData = slots[quirkSlotIndex] or slots[1]
-    QuirkSlotBtn.Text = "📍 Ranura: " .. slotData.name
+    QuirkSlotBtn.Text = "[.] Ranura: " .. slotData.name
     
     local presets = (quirkTypeIndex == 3) and GRADE_PRESET_MODES or QUIRK_PRESET_MODES
     local curPreset = presets[quirkPresetIndex] or presets[1]
@@ -6068,9 +6068,9 @@ local function autoQuirkLoop()
         if not entityGuid then
             QuirkStatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
             if quirkTypeIndex == 3 then
-                QuirkStatusLabel.Text = "Estado: ❌ ¡Selecciona un equipo de héroe en el menú de grados!"
+                QuirkStatusLabel.Text = "Estado: [X] ¡Selecciona un equipo de héroe en el menú de grados!"
             else
-                QuirkStatusLabel.Text = "Estado: ❌ ¡Selecciona héroe/arma en el menú de rasgos!"
+                QuirkStatusLabel.Text = "Estado: [X] ¡Selecciona héroe/arma en el menú de rasgos!"
             end
             isQuirkRunning = false
             updateQuirkButtonVisuals()
@@ -6080,7 +6080,7 @@ local function autoQuirkLoop()
         local coreCount, slotData = getQuirkCoreCount()
         if coreCount < 1 then
             QuirkStatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-            QuirkStatusLabel.Text = string.format("Estado: ❌ ¡Se agotó %s! Detenido.", slotData.short)
+            QuirkStatusLabel.Text = string.format("Estado: [X] ¡Se agotó %s! Detenido.", slotData.short)
             pcall(function()
                 if SoundManager and SoundManager.PlaySound then
                     SoundManager.PlaySound(SoundManager.soundType.Sound2D, 160022)
@@ -6765,11 +6765,11 @@ do
     function SB.updateVisuals()
         if SB.Lock1Btn then
             if SB.lock1Name then
-                SB.Lock1Btn.Text = "🎯 Objetivo: " .. tostring(SB.lock1Name)
+                SB.Lock1Btn.Text = "[*] Objetivo: " .. tostring(SB.lock1Name)
                 SB.Lock1Btn.TextColor3 = Color3.fromRGB(130, 255, 165)
                 SB.Lock1Btn.BackgroundColor3 = Color3.fromRGB(30, 55, 42)
             else
-                SB.Lock1Btn.Text = "🎯 Objetivo: Auto (más cercano)"
+                SB.Lock1Btn.Text = "[*] Objetivo: Auto (más cercano)"
                 SB.Lock1Btn.TextColor3 = Color3.fromRGB(160, 215, 255)
                 SB.Lock1Btn.BackgroundColor3 = Color3.fromRGB(32, 42, 60)
             end
@@ -6777,7 +6777,7 @@ do
 
         if SB.SpeedBtn then
             local sp = SB.speeds[SB.speedIndex] or SB.speeds[1]
-            SB.SpeedBtn.Text = "⚡ Velocidad: " .. sp.label
+            SB.SpeedBtn.Text = "[+] Velocidad: " .. sp.label
         end
 
         if SB.ToggleBtn then
@@ -6936,7 +6936,7 @@ do
                 SB.updateVisuals()
                 if SB.EnemyModal then SB.EnemyModal.Visible = false end
                 if SB.StatusLabel then
-                    SB.StatusLabel.Text = string.format("🎯 Objetivo fijado: %s (%.0fm)", tostring(enemy.name), enemy.dist or 0)
+                    SB.StatusLabel.Text = string.format("[*] Objetivo fijado: %s (%.0fm)", tostring(enemy.name), enemy.dist or 0)
                 end
             end)
         end
@@ -7226,7 +7226,16 @@ do
             end
             t1 = found
         else
-            if bossPriorityEnabled then
+            -- Mantener el objetivo actual hasta que muera (no cambiar solo porque otro este mas cerca)
+            if SB.activeMainGuid then
+                for _, e in ipairs(enemies) do
+                    if e.guid == SB.activeMainGuid and SB.isTargetAlive(e) then
+                        t1 = e
+                        break
+                    end
+                end
+            end
+            if not t1 and bossPriorityEnabled then
                 for _, e in ipairs(enemies) do
                     if e.level == 99 or tostring(e.name):lower():find("boss") ~= nil then
                         t1 = e
@@ -7334,9 +7343,9 @@ do
 
             if SB.StatusLabel then
                 if t2 then
-                    SB.StatusLabel.Text = string.format("🎯 Atacando: %s (%s)", tostring(t1.name), SB.formatNum(t1.hp))
+                    SB.StatusLabel.Text = string.format("[*] Atacando: %s (%s)", tostring(t1.name), SB.formatNum(t1.hp))
                 else
-                    SB.StatusLabel.Text = string.format("🎯 Atacando: %s (%s) [solo 1 monstruo]", tostring(t1.name), SB.formatNum(t1.hp))
+                    SB.StatusLabel.Text = string.format("[*] Atacando: %s (%s) [solo 1 monstruo]", tostring(t1.name), SB.formatNum(t1.hp))
                 end
             end
             local stepStart = tick()
@@ -7418,7 +7427,7 @@ do
             SB.lock1Guid, SB.lock1Name = nil, nil
             SB.updateVisuals()
             if SB.EnemyModal then SB.EnemyModal.Visible = false end
-            if SB.StatusLabel then SB.StatusLabel.Text = "🎯 Objetivo: Auto (más cercano)" end
+            if SB.StatusLabel then SB.StatusLabel.Text = "[*] Objetivo: Auto (más cercano)" end
         end)
     end
     if SB.ModalCloseBtn then
@@ -7535,7 +7544,7 @@ local function autoRaidLoop()
                     targetMapId = 50001
                 end
             elseif mapCfg.isAscension and raidTypeIndex == 3 and OPT and OPT.ascQueue then
-                -- โหมด 3: 💎 Asc + Rune Queue (ประตูไหนของเป้าที่ยังไม่ครบเกิดก่อนก็เก็บเลย | นับเริ่ม 0/เป้า)
+                -- โหมด 3: [Q] Asc + Rune Queue (ประตูไหนของเป้าที่ยังไม่ครบเกิดก่อนก็เก็บเลย | นับเริ่ม 0/เป้า)
                 local goals, reason = OPT.ascQueue.getUnfinishedGoals(mapCfg)
                 if OPT.ascQueue.updateBtnVisuals then
                     OPT.ascQueue.updateBtnVisuals()
@@ -7545,14 +7554,14 @@ local function autoRaidLoop()
                 end
                 if not goals then
                     if reason == "ALL_DONE" then
-                        RaidStatusLabel.Text = "✅ ¡Cola de ascensión completada!"
+                        RaidStatusLabel.Text = "[OK] ¡Cola de ascensión completada!"
                         isRaidRunning = false
                         ToggleRaidBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
                         ToggleRaidBtn.Text = OPT.ascQueue.getRaidBtnText(false)
                         saveBotState(false)
                         break
                     else
-                        RaidStatusLabel.Text = "⚠️ ¡Pulsa primero 📝 Elegir objetivo / Runas arriba!"
+                        RaidStatusLabel.Text = "[!] ¡Pulsa primero [P] Elegir objetivo / Runas arriba!"
                         task.wait(1.5)
                         continue
                     end
@@ -7567,13 +7576,13 @@ local function autoRaidLoop()
                     local firstG = goals[1]
                     local mode = AUTO_REJOIN_MODES[autoRejoinIndex].mode
                     if mode == "HOP" then
-                        RaidStatusLabel.Text = string.format("🎯 Quedan %d objetivos (%s %d/%d). Sin puerta, saltando...", #goals, firstG.mat, firstG.have, firstG.target)
+                        RaidStatusLabel.Text = string.format("[*] Quedan %d objetivos (%s %d/%d). Sin puerta, saltando...", #goals, firstG.mat, firstG.have, firstG.target)
                         saveBotState(true)
                         doRejoinOrHop()
                         task.wait(15)
                         continue
                     else
-                        RaidStatusLabel.Text = string.format("🎯 Esperando puerta (quedan %d | p. ej. %s %d/%d)", #goals, firstG.mat, firstG.have, firstG.target)
+                        RaidStatusLabel.Text = string.format("[*] Esperando puerta (quedan %d | p. ej. %s %d/%d)", #goals, firstG.mat, firstG.have, firstG.target)
                         task.wait(1.0)
                         continue
                     end
@@ -7695,16 +7704,16 @@ local function autoRaidLoop()
             if pendingAscPlan then
                 local curTI = RaidsManager and RaidsManager.currentTeamInfo
                 if type(curTI) ~= "table" or not (curTI.id or curTI.raidId) then
-                    RaidStatusLabel.Text = "⚠️ No se pudo crear la sala de incursión, reintentando..."
+                    RaidStatusLabel.Text = "[!] No se pudo crear la sala de incursión, reintentando..."
                     task.wait(0.8)
                     continue
                 end
                 if pendingAscPlan.slot1 or pendingAscPlan.slot2 then
-                    RaidStatusLabel.Text = string.format("💎 Aplicando runa %s → %s (%d/%d)", pendingAscPlan.desc, pendingAscPlan.goalMat, pendingAscPlan.goalHave, pendingAscPlan.goalTarget)
+                    RaidStatusLabel.Text = string.format("[Q] Aplicando runa %s → %s (%d/%d)", pendingAscPlan.desc, pendingAscPlan.goalMat, pendingAscPlan.goalHave, pendingAscPlan.goalTarget)
                     task.wait(0.15)
                     local okRunes = OPT.ascQueue.applyRunes(pendingAscPlan)
                     if not okRunes then
-                        RaidStatusLabel.Text = "⚠️ No se aplicó la runa, cancelando sala y reintentando..."
+                        RaidStatusLabel.Text = "[!] No se aplicó la runa, cancelando sala y reintentando..."
                         pcall(function()
                             if RaidsManager and RaidsManager.LeaveTeam then RaidsManager.LeaveTeam() end
                         end)
@@ -7712,7 +7721,7 @@ local function autoRaidLoop()
                         continue
                     end
                 else
-                    RaidStatusLabel.Text = string.format("🎯 Entrando directo → %s (%d/%d)", pendingAscPlan.goalMat, pendingAscPlan.goalHave, pendingAscPlan.goalTarget)
+                    RaidStatusLabel.Text = string.format("[*] Entrando directo → %s (%d/%d)", pendingAscPlan.goalMat, pendingAscPlan.goalHave, pendingAscPlan.goalTarget)
                 end
             end
 
@@ -8186,7 +8195,7 @@ end
 ToggleRaidBtn.MouseButton1Click:Connect(function()
     if not isRaidRunning and raidTypeIndex == 3 and OPT and OPT.ascQueue then
         if OPT.ascQueue.hasAnyTarget and not OPT.ascQueue.hasAnyTarget() then
-            RaidStatusLabel.Text = "⚠️ ¡Configura la cantidad objetivo (M+..Ω) antes de empezar!"
+            RaidStatusLabel.Text = "[!] ¡Configura la cantidad objetivo (M+..Ω) antes de empezar!"
             if OPT.ascQueue.Modal then
                 OPT.ascQueue.Modal.Visible = true
                 if OPT.ascQueue.refreshModal then OPT.ascQueue.refreshModal() end
@@ -8434,10 +8443,10 @@ chk(1, function()
     -- Cabecera
     Header.BackgroundColor3 = Color3.fromRGB(8, 18, 38)
     addStroke(Header, blueDark, 1, 0.6)
-    Title.Text = "⚡ ENKY HUB  ·  ARISE"
+    Title.Text = "[+] ENKY HUB  ·  ARISE"
     Title.TextColor3 = Color3.fromRGB(225, 240, 255)
     Title.TextSize = 14
-    Title.Size = UDim2.new(1, -108, 1, 0)
+    Title.Size = UDim2.new(1, -156, 1, 0)
     local accentBar = Header:FindFirstChild("AccentBar")
     if accentBar then accentBar.BackgroundColor3 = neonBlue end
 
@@ -8465,11 +8474,11 @@ chk(2, function()
     sideLabel.ZIndex = 2
 
     local nav = {
-        {TabRaidBtn,    "⚔️  Incursión"},
-        {TabFarmBtn,    "🌍  Granja"},
-        {TabQuirkBtn,   "🔮  Tirada"},
-        {TabSettingBtn, "⚙️  Ajustes"},
-        {TabInfoBtn,    "ℹ️  Info"},
+        {TabRaidBtn,    "[R]  Incursión"},
+        {TabFarmBtn,    "[F]  Granja"},
+        {TabQuirkBtn,   "[T]  Tirada"},
+        {TabSettingBtn, "[S]  Ajustes"},
+        {TabInfoBtn,    "[I]  Info"},
     }
     for i, item in ipairs(nav) do
         local b = item[1]
@@ -8500,7 +8509,7 @@ chk(2, function()
     avatar.Size = UDim2.new(0, 34, 0, 34)
     avatar.Position = UDim2.new(0, 8, 0, 13)
     avatar.BackgroundColor3 = neonBlue
-    avatar.Text = "⚡"
+    avatar.Text = "[+]"
     avatar.TextColor3 = Color3.fromRGB(5, 12, 25)
     avatar.Font = Enum.Font.GothamBold
     avatar.TextSize = 18
@@ -8537,7 +8546,7 @@ chk(3, function()
     contentTitle.Size = UDim2.new(1, -106, 0, 24)
     contentTitle.Position = UDim2.new(0, 100, 0, 40)
     contentTitle.BackgroundTransparency = 1
-    contentTitle.Text = "✨ Panel de control"
+    contentTitle.Text = "[*] Panel de control"
     contentTitle.TextColor3 = neonBlue
     contentTitle.Font = Enum.Font.GothamBold
     contentTitle.TextSize = 12
@@ -8572,7 +8581,7 @@ chk(4, function()
 end)
 
 -- ====================================================================
--- ⚙️ ENKY: panel de selección múltiple (mapas, niveles, rasgos, farmeo)
+-- [S] ENKY: panel de selección múltiple (mapas, niveles, rasgos, farmeo)
 -- ====================================================================
 pcall(function()
     local ENKY_PanelBtn = Instance.new("TextButton", Header)
@@ -8644,44 +8653,44 @@ pcall(function()
         y = y + 20
     end
 
-    section("🗺️ MAPAS NORMALES (se alternan)")
+    section("[M] MAPAS NORMALES (se alternan)")
     for i, m in ipairs(NORMAL_RAID_LIST) do
         toggle(m.name,
             function() return ENKY_MultiMaps.normal[i] == true end,
             function(v) ENKY_MultiMaps.normal[i] = v or nil end)
     end
-    section("🗼 TORRES DE ASCENSIÓN (se alternan)")
+    section("[T] TORRES DE ASCENSIÓN (se alternan)")
     for i, m in ipairs(ASCENSION_RAID_LIST) do
         toggle(m.name,
             function() return ENKY_MultiMaps.tower[i] == true end,
             function(v) ENKY_MultiMaps.tower[i] = v or nil end)
     end
-    section("🎯 NIVELES DE INCURSIÓN")
+    section("[*] NIVELES DE INCURSIÓN")
     for i, d in ipairs(NORMAL_TIER_DEFINITIONS) do
         toggle(d.name,
             function() return selectedNormalTiers[i] == true end,
             function(v) selectedNormalTiers[i] = v end)
     end
-    section("🎯 NIVELES DE TORRE")
+    section("[*] NIVELES DE TORRE")
     for i, d in ipairs(ASCENSION_TIER_DEFINITIONS) do
         toggle(d.name,
             function() return selectedAscTiers[i] == true end,
             function(v) selectedAscTiers[i] = v end)
     end
-    section("🔮 OBJETIVOS DE TIRADA (se combinan)")
+    section("[T] OBJETIVOS DE TIRADA (se combinan)")
     for i = 1, 4 do
         local names = { "Mítico+ / Q5+", "Legendario+ / Q4+", "Personalizados", "Más alto" }
         toggle(names[i],
             function() return ENKY_MultiPresets[i] == true end,
             function(v) ENKY_MultiPresets[i] = v or nil end)
     end
-    section("⚡ VELOCIDADES (se alternan)")
+    section("[+] VELOCIDADES (se alternan)")
     for i, m in ipairs(QUIRK_SPEED_MODES) do
         toggle(m.name,
             function() return ENKY_MultiSpeeds[i] == true end,
             function(v) ENKY_MultiSpeeds[i] = v or nil end)
     end
-    section("🌍 FILTROS DE FARMEO (se combinan)")
+    section("[F] FILTROS DE FARMEO (se combinan)")
     for i, m in ipairs(FARM_FILTER_MODES) do
         toggle(m.name,
             function() return ENKY_MultiFarm[i] == true end,
@@ -8852,7 +8861,7 @@ pcall(function()
         end
     end
 
-    local sectionTexts = { "⚔️ Incursiones simultáneas", "🌍 Farmeos simultáneos", "🔮 Rolls simultáneos", "⚙️ Ajustes", "ℹ️ Info" }
+    local sectionTexts = { "[R] Incursiones simultáneas", "[F] Farmeos simultáneos", "[T] Rolls simultáneos", "[S] Ajustes", "[I] Info" }
     for i = 1, 5 do
         mk(pages[i], "TextLabel", {
             Size = UDim2.new(0.55, 0, 0, 18), Position = UDim2.new(0, 4, 0, 4),
@@ -9012,7 +9021,7 @@ pcall(function()
     local gradeNames   = { "Primordial+ (G+)", "Mythic+ (S+)", "M Only (M)", "Personalizados" }
 
     -- Incursión
-    local c1, s1, f1 = card(pages[1], 24, "⚔️ Incursión normal", "Selecciona mapas y niveles")
+    local c1, s1, f1 = card(pages[1], 24, "[R] Incursión normal", "Selecciona mapas y niveles")
     dropdown(c1, 8, 36, 120, mapNames,
         function(i) return ENKY_MultiMaps.normal[i] == true end,
         function(i, v) ENKY_MultiMaps.normal[i] = v or nil end, "mapas")
@@ -9024,7 +9033,7 @@ pcall(function()
         if v then anim(s1, f1, function() return isRaidRunning end, "Buscando incursión") end
     end)
 
-    local c2, s2, f2 = card(pages[1], 120, "🗼 Torre de ascensión", "Selecciona torres y niveles")
+    local c2, s2, f2 = card(pages[1], 120, "[T] Torre de ascensión", "Selecciona torres y niveles")
     dropdown(c2, 8, 36, 120, towerNames,
         function(i) return ENKY_MultiMaps.tower[i] == true end,
         function(i, v) ENKY_MultiMaps.tower[i] = v or nil end, "torres")
@@ -9036,13 +9045,13 @@ pcall(function()
         if v then anim(s2, f2, function() return isRaidRunning end, "Buscando torre") end
     end)
 
-    local c3, s3, f3 = card(pages[1], 216, "🔁 Salto de servidor", "Si no aparece la puerta deseada")
+    local c3, s3, f3 = card(pages[1], 216, "[<] Salto de servidor", "Si no aparece la puerta deseada")
     sw(c3, 1, function() return autoRejoinIndex == 2 end, function(v)
         autoRejoinIndex = v and 2 or 1
         updateAutoRejoinButtonVisuals()
         if v then anim(s3, f3, function() return autoRejoinIndex == 2 end, "Buscando servidor") end
     end)
-    local cQ, sQ, fQ = card(pages[1], 304, "💎 Asc + Rune Queue", "Cola de ascensión con runas")
+    local cQ, sQ, fQ = card(pages[1], 304, "[Q] Asc + Rune Queue", "Cola de ascensión con runas")
     dropdown(cQ, 8, 36, 180, towerNames,
         function(i) return ENKY_MultiMaps.tower[i] == true end,
         function(i, v) ENKY_MultiMaps.tower[i] = v or nil end, "torres")
@@ -9053,7 +9062,7 @@ pcall(function()
     end)
     local cfgQ = mk(cQ, "TextButton", {
         Size = UDim2.new(0, 70, 0, 16), Position = UDim2.new(1, -76, 0, 36),
-        BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "⚙️ Runas ▾",
+        BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "[S] Runas ▾",
         TextColor3 = soft, Font = Enum.Font.GothamBold, TextSize = 7, ZIndex = 65
     })
     cfgQ.MouseButton1Click:Connect(function()
@@ -9073,9 +9082,9 @@ pcall(function()
 
     -- Granja
     local farmCards = {
-        { "🌍 Todos los monstruos", "Objetivo: todos" },
-        { "👑 Solo jefes", "Objetivo: solo jefes" },
-        { "👤 Solo normales", "Objetivo: monstruos normales" }
+        { "[F] Todos los monstruos", "Objetivo: todos" },
+        { "[B] Solo jefes", "Objetivo: solo jefes" },
+        { "[H] Solo normales", "Objetivo: monstruos normales" }
     }
     for i, d in ipairs(farmCards) do
         local c, st, fl = card(pages[2], 24 + (i - 1) * 92, d[1], d[2])
@@ -9087,7 +9096,7 @@ pcall(function()
             if v then anim(st, fl, function() return isFarmRunning end, "Farmeando") end
         end)
     end
-    local cR, sR, fR = card(pages[2], 300, "🐉 Radar de Dragon Ball", "7 esferas gratis")
+    local cR, sR, fR = card(pages[2], 300, "[D] Radar de Dragon Ball", "7 esferas gratis")
     sw(cR, 2, function() return OPT.db and OPT.db.autoLoop == true end, function(v)
         if OPT.db then
             if v then OPT.db.startLoop() else OPT.db.autoLoop = false end
@@ -9096,13 +9105,13 @@ pcall(function()
     end)
     -- Tirada
     local rollCards = {
-        { "👤 Rasgo de héroe", "Ranura 1 (Núcleo rojo)", 1 },
-        { "⚔️ Rasgo de arma", "Ranura 1 (Piedra de arma 1)", 2 },
-        { "🛡️ Grado de equipo", "Ranura 1 (Piedra G 1)", 3 }
+        { "[H] Rasgo de héroe", "Ranura 1 (Núcleo rojo)", 1 },
+        { "[R] Rasgo de arma", "Ranura 1 (Piedra de arma 1)", 2 },
+        { "[A] Grado de equipo", "Ranura 1 (Piedra G 1)", 3 }
     }
     local pickBtn = mk(pages[3], "TextButton", {
         Size = UDim2.new(0, 120, 0, 18), Position = UDim2.new(1, -126, 0, 4),
-        BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "📝 Rasgos personalizados ▾",
+        BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "[P] Rasgos personalizados ▾",
         TextColor3 = soft, Font = Enum.Font.GothamBold, TextSize = 7, ZIndex = 64
     })
     pickBtn.MouseButton1Click:Connect(function()
@@ -9153,7 +9162,7 @@ pcall(function()
     offS.MouseButton1Click:Connect(function() for _, x in ipairs(switches[4]) do if x.isOn() then x.onChange(false); x.setVis(false) end end end)
 
     -- Skill Bug (nuevo en la version del repo)
-    local sbCard = card(pages[4], 24 + #settings * 92, "🎯 Skill Bug", "Ataque con skill bug")
+    local sbCard = card(pages[4], 24 + #settings * 92, "[*] Skill Bug", "Ataque con skill bug")
     local function raiseModal(m)
         if not m:GetAttribute("ENKYRaised") then
             m:SetAttribute("ENKYRaised", true)
@@ -9175,7 +9184,7 @@ pcall(function()
     end)
     local sbPick = mk(sbCard, "TextButton", {
         Size = UDim2.new(0, 90, 0, 18), Position = UDim2.new(0, 8, 0, 36),
-        BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "🎯 Objetivo ▾",
+        BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "[*] Objetivo ▾",
         TextColor3 = soft, Font = Enum.Font.GothamBold, TextSize = 7, ZIndex = 65
     })
     sbPick.MouseButton1Click:Connect(function()
@@ -9187,18 +9196,18 @@ pcall(function()
     end)
     local sbSpeed = mk(sbCard, "TextButton", {
         Size = UDim2.new(0, 108, 0, 18), Position = UDim2.new(0, 102, 0, 36),
-        BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "⚡ Velocidad ▾",
+        BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "[+] Velocidad ▾",
         TextColor3 = soft, Font = Enum.Font.GothamBold, TextSize = 7, ZIndex = 65
     })
     sbSpeed.MouseButton1Click:Connect(function()
         SB.speedIndex = (SB.speedIndex % #SB.speeds) + 1
         if SB.updateVisuals then pcall(SB.updateVisuals) end
-        sbSpeed.Text = "⚡ " .. tostring(SB.speeds[SB.speedIndex].label)
+        sbSpeed.Text = "[+] " .. tostring(SB.speeds[SB.speedIndex].label)
     end)
 
     -- Info
     local infoLines = {
-        "⚡ ENKY HUB · ARISE",
+        "[+] ENKY HUB · ARISE",
         "Modo: " .. ((raidTypeIndex == 1) and "Incursión normal" or "Torre de ascensión"),
         "Mapa: " .. (getCurrentMapConfig().name or ""),
         "Nivel: " .. getSelectedTiersText(),
@@ -9218,4 +9227,268 @@ pcall(function()
     end
 
     scroll.CanvasSize = UDim2.new(0, 0, 0, 900)
+end)
+
+
+-- ====================================================================
+-- 🔘 ENKY: expandir ventana + NoClip
+-- ====================================================================
+pcall(function()
+    local function mk(parent, class, props)
+        local o = Instance.new(class, parent)
+        for k, v in pairs(props) do o[k] = v end
+        return o
+    end
+
+    local expandBtn = mk(Header, "TextButton", {
+        Size = UDim2.new(0, 24, 0, 22), Position = UDim2.new(1, -104, 0, 4),
+        BackgroundColor3 = Color3.fromRGB(14, 40, 85), Text = "[E]",
+        TextColor3 = Color3.fromRGB(120, 210, 255), Font = Enum.Font.GothamBold, TextSize = 9
+    })
+    mk(expandBtn, "UICorner", { CornerRadius = UDim.new(0, 5) })
+    local expanded = false
+    expandBtn.MouseButton1Click:Connect(function()
+        expanded = not expanded
+        local w, h = 500, 360
+        if expanded then
+            local cam = Workspace and Workspace.CurrentCamera
+            w = math.min(900, (cam and cam.ViewportSize.X or 800) * 0.92)
+            h = math.min(620, (cam and cam.ViewportSize.Y or 600) * 0.92)
+        end
+        MainFrame.Size = UDim2.new(0, w, 0, h)
+        MainFrame.Position = UDim2.new(0.5, -w / 2, 0.5, -h / 2)
+    end)
+
+    local ncBtn = mk(Header, "TextButton", {
+        Size = UDim2.new(0, 24, 0, 22), Position = UDim2.new(1, -130, 0, 4),
+        BackgroundColor3 = Color3.fromRGB(14, 40, 85), Text = "NC",
+        TextColor3 = Color3.fromRGB(180, 200, 230), Font = Enum.Font.GothamBold, TextSize = 9
+    })
+    mk(ncBtn, "UICorner", { CornerRadius = UDim.new(0, 5) })
+    local noclipOn = false
+    local savedCollide = {}
+    local ncConn = nil
+    local function stopNoclip()
+        if ncConn then ncConn:Disconnect(); ncConn = nil end
+        for obj, state in pairs(savedCollide) do
+            pcall(function() if obj.Parent then obj.CanCollide = state end end)
+        end
+        savedCollide = {}
+    end
+    local function startNoclip()
+        stopNoclip()
+        ncConn = RunService.RenderStepped:Connect(function()
+            pcall(function()
+                local ch = LocalPlayer and LocalPlayer.Character
+                if not ch then return end
+                for _, obj in ipairs(ch:GetDescendants()) do
+                    if obj:IsA("BasePart") then
+                        if savedCollide[obj] == nil then savedCollide[obj] = obj.CanCollide end
+                        obj.CanCollide = false
+                    end
+                end
+            end)
+        end)
+    end
+    ncBtn.MouseButton1Click:Connect(function()
+        noclipOn = not noclipOn
+        if noclipOn then
+            startNoclip()
+            ncBtn.BackgroundColor3 = Color3.fromRGB(50, 180, 50)
+            ncBtn.TextColor3 = Color3.new(1, 1, 1)
+        else
+            stopNoclip()
+            ncBtn.BackgroundColor3 = Color3.fromRGB(14, 40, 85)
+            ncBtn.TextColor3 = Color3.fromRGB(180, 200, 230)
+        end
+    end)
+end)
+
+-- ====================================================================
+-- 🧪 ENKY: sistema de pociones (PotionMerge)
+-- ====================================================================
+pcall(function()
+    local panel = MainFrame:FindFirstChild("ENKY_Modern")
+    if not panel then return end
+    local scroll = panel:FindFirstChildOfClass("ScrollingFrame")
+    local page = scroll and scroll:GetChildren()[2]
+    if not page then return end
+
+    local neon = Color3.fromRGB(0, 150, 255)
+    local soft = Color3.fromRGB(185, 215, 255)
+    local unpackFn = unpack or table.unpack
+    local counts = { 1, 5, 10, 25, 50 }
+    local countIndex = 2
+
+    local function mk(parent, class, props)
+        local o = Instance.new(class, parent)
+        for k, v in pairs(props) do o[k] = v end
+        return o
+    end
+
+    local titleLbl = mk(page, "TextLabel", {
+        Size = UDim2.new(0.6, 0, 0, 18), Position = UDim2.new(0, 4, 0, 398),
+        BackgroundTransparency = 1, Text = "[*] POCIONES", TextColor3 = neon,
+        Font = Enum.Font.GothamBold, TextSize = 10,
+        TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 62
+    })
+
+    local countBtn = mk(page, "TextButton", {
+        Size = UDim2.new(0, 80, 0, 18), Position = UDim2.new(1, -86, 0, 398),
+        BackgroundColor3 = Color3.fromRGB(20, 50, 100), Text = "Cant: 5 ▾",
+        TextColor3 = soft, Font = Enum.Font.GothamBold, TextSize = 8, ZIndex = 64
+    })
+    countBtn.MouseButton1Click:Connect(function()
+        countIndex = (countIndex % #counts) + 1
+        countBtn.Text = "Cant: " .. counts[countIndex] .. " ▾"
+    end)
+
+    local potions = {
+        { 10047, "Suerte V1" },
+        { 10048, "Daño V1" },
+        { 10049, "Oro V1" },
+        { 10050, "Suerte V2" },
+        { 10051, "Daño V2" },
+        { 10052, "Oro V2" }
+    }
+    for i, p in ipairs(potions) do
+        local row = mk(page, "Frame", {
+            Size = UDim2.new(1, -8, 0, 40), Position = UDim2.new(0, 4, 0, 420 + (i - 1) * 48),
+            BackgroundColor3 = Color3.fromRGB(16, 32, 62), BorderSizePixel = 0, ZIndex = 62
+        })
+        mk(row, "UICorner", { CornerRadius = UDim.new(0, 6) })
+        mk(row, "UIStroke", { Color = Color3.fromRGB(0, 120, 200), Thickness = 1, Transparency = 0.6 })
+        mk(row, "TextLabel", {
+            Size = UDim2.new(1, -80, 1, 0), Position = UDim2.new(0, 8, 0, 0),
+            BackgroundTransparency = 1, Text = "[P] " .. p[2],
+            TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 9,
+            TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 63
+        })
+        local useBtn = mk(row, "TextButton", {
+            Size = UDim2.new(0, 62, 0, 24), Position = UDim2.new(1, -68, 0, 8),
+            BackgroundColor3 = Color3.fromRGB(0, 120, 200), Text = "USAR",
+            TextColor3 = Color3.new(1, 1, 1), Font = Enum.Font.GothamBold, TextSize = 8, ZIndex = 64
+        })
+        mk(useBtn, "UICorner", { CornerRadius = UDim.new(0, 5) })
+        useBtn.MouseButton1Click:Connect(function()
+            pcall(function()
+                local args = { { id = p[1], count = counts[countIndex] } }
+                ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("PotionMerge"):InvokeServer(unpackFn(args))
+            end)
+        end)
+    end
+    scroll.CanvasSize = UDim2.new(0, 0, 0, 1100)
+end)
+
+
+-- ====================================================================
+-- 📱 ENKY: diseño responsive para celular
+-- ====================================================================
+pcall(function()
+    local cam = Workspace and Workspace.CurrentCamera
+    local function vp()
+        return (cam and cam.ViewportSize) or Vector2.new(500, 360)
+    end
+    local panel = MainFrame:FindFirstChild("ENKY_Modern")
+    local scroll = panel and panel:FindFirstChildOfClass("ScrollingFrame")
+
+    -- guardar tamaños de texto originales una sola vez
+    if scroll then
+        for _, d in ipairs(scroll:GetDescendants()) do
+            if (d:IsA("TextLabel") or d:IsA("TextButton")) and d:GetAttribute("ENKYBaseText") == nil then
+                d:SetAttribute("ENKYBaseText", d.TextSize)
+            end
+        end
+    end
+
+    local function clampPops()
+        if not panel then return end
+        local pw = panel.AbsoluteSize.X
+        for _, pop in ipairs(panel:GetChildren()) do
+            if pop:IsA("Frame") and pop.ZIndex >= 100 then
+                local function fix()
+                    local maxX = pw - pop.Size.X.Offset - 4
+                    if pop.Position.X.Offset > maxX then
+                        pop.Position = UDim2.new(0, math.max(2, maxX),
+                            pop.Position.Y.Scale, pop.Position.Y.Offset)
+                    end
+                end
+                fix()
+                pop:GetPropertyChangedSignal("Visible"):Connect(function()
+                    if pop.Visible then pcall(fix) end
+                end)
+            end
+        end
+    end
+    clampPops()
+
+    local function apply()
+        local v = vp()
+        local w = math.min(500, v.X - 16)
+        local h = math.min(360, v.Y - 70)
+        if w < 240 then w = math.max(200, v.X - 8) end
+        if h < 200 then h = math.max(180, v.Y - 40) end
+        MainFrame.Size = UDim2.new(0, w, 0, h)
+        MainFrame.Position = UDim2.new(0.5, -w / 2, 0.5, -h / 2)
+
+        -- cabecera: 5 botones + titulo
+        Title.Size = UDim2.new(1, -146, 1, 0)
+        if w < 380 then Title.TextSize = 11 else Title.TextSize = 13 end
+
+        -- barra lateral
+        local sw = math.max(68, math.min(96, w * 0.22))
+        TabBar.Size = UDim2.new(0, sw, 1, -46)
+        local navH = math.max(28, math.min(34, h * 0.09))
+        local navIdx = 0
+        for _, b in ipairs(TabBar:GetChildren()) do
+            if b:IsA("TextButton") then
+                navIdx = navIdx + 1
+                b.Size = UDim2.new(1, -10, 0, navH)
+                b.Position = UDim2.new(0, 5, 0, 26 + (navIdx - 1) * (navH + 4))
+                b.TextSize = (sw < 78) and 8 or 10
+            elseif b:IsA("TextLabel") then
+                b.TextSize = (sw < 78) and 8 or 9
+            end
+        end
+        local prof = TabBar:FindFirstChild("ProfileCard")
+        if prof then
+            local ph = math.max(48, math.min(60, h * 0.18))
+            prof.Size = UDim2.new(1, -10, 0, ph)
+            prof.Position = UDim2.new(0, 5, 1, -(ph + 6))
+        end
+
+        -- panel de contenido
+        if panel then
+            panel.Position = UDim2.new(0, sw + 10, 0, 42)
+            panel.Size = UDim2.new(1, -(sw + 18), 1, -46)
+        end
+
+        -- texto proporcional (sin acumular reducciones)
+        if scroll then
+            local scale = math.min(1, w / 500)
+            for _, d in ipairs(scroll:GetDescendants()) do
+                if d:IsA("TextLabel") or d:IsA("TextButton") then
+                    local base = d:GetAttribute("ENKYBaseText")
+                    if base then d.TextSize = math.max(7, math.floor(base * scale)) end
+                end
+            end
+        end
+    end
+    apply()
+
+    -- volver a aplicar al girar la pantalla
+    if cam then
+        cam:GetPropertyChangedSignal("ViewportSize"):Connect(function() pcall(apply) end)
+    end
+
+    -- si el boton [E] vuelve al tamano fijo, lo reajustamos al celular
+    for _, b in ipairs(Header:GetChildren()) do
+        if b:IsA("TextButton") and b.Text == "[E]" then
+            b.MouseButton1Click:Connect(function()
+                task.defer(function()
+                    if MainFrame.Size.X.Offset < 600 then pcall(apply) end
+                end)
+            end)
+        end
+    end
 end)
